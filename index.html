@@ -33,20 +33,63 @@
       margin: 4mm 8mm 4mm 8mm;
     }
 
+    /* 螢幕模式優化：左右寬度滿版舒適，上下垂直空間與字體放大，提升閱讀性 */
     @media screen {
       .a4-sheet {
-        width: 210mm;
-        min-height: 297mm;
-        margin: 10px auto;
+        width: 95%;
+        max-width: 1200px;
+        min-height: auto;
+        margin: 20px auto;
+        padding: 24px 32px !important;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        font-size: 14px !important;
+      }
+      .toolbar-container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 10px auto;
+      }
+      /* 表格與文字在螢幕上等比例放大 */
+      .screen-text-lg th, .screen-text-lg td {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        font-size: 13px !important;
+      }
+      .calc-input {
+        font-size: 15px !important;
+        padding: 3px 0 !important;
+      }
+      .info-grid {
+        font-size: 13px !important;
+        line-height: 1.6 !important;
+      }
+      .info-grid input {
+        font-size: 14px !important;
+      }
+      /* 螢幕上的 QR Code 容器 */
+      .qr-box-container {
+        width: 96px !important;
+        height: 96px !important;
+        position: relative !important;
+      }
+      .qr-box-container canvas {
+        display: none !important;
+      }
+      .qr-box-container img {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        object-fit: contain !important;
       }
     }
 
+    /* 列印模式嚴格鎖定 A4 單頁，徹底修復 QR code 切割與文字排版 */
     @media print {
       body {
         background-color: #ffffff !important;
         padding: 0 !important;
         margin: 0 !important;
+        font-size: 11px !important;
       }
       .no-print {
         display: none !important;
@@ -58,6 +101,7 @@
         width: 100% !important;
         height: 100% !important;
         padding: 2mm 3mm !important;
+        font-size: 11px !important;
       }
       input, select, textarea {
         border-color: transparent !important;
@@ -68,6 +112,22 @@
       input[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
+      }
+      /* 列印時 QR Code 縮放適應，定位點絕不切邊且不重疊 */
+      .qr-box-container {
+        width: 68px !important;
+        height: 68px !important;
+        padding: 0 !important;
+        position: relative !important;
+      }
+      .qr-box-container canvas {
+        display: none !important;
+      }
+      .qr-box-container img {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        object-fit: contain !important;
       }
     }
 
@@ -103,7 +163,7 @@
 <body class="py-2 px-1 min-h-screen">
 
   <!-- 頂部功能工具列 (列印時隱藏) -->
-  <div class="max-w-[210mm] mx-auto mb-2 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 no-print">
+  <div class="toolbar-container mx-auto mb-2 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 no-print">
     
     <!-- 工具列第一列：主標題、學期切換與學校搜尋 -->
     <div class="flex flex-wrap items-center justify-between gap-2">
@@ -217,19 +277,19 @@
           </div>
         </div>
 
-        <!-- QR Code 與 查驗資訊 -->
-        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-300 p-1 rounded">
-          <div id="qrcodeBox" class="w-12 h-12 bg-white border border-slate-200 flex items-center justify-center p-0.5"></div>
-          <div class="text-[9px] leading-tight text-slate-600 space-y-0.5 text-left">
-            <p class="font-bold text-red-700">📱 線上核對碼</p>
-            <p id="qrOrderLabel" class="font-mono text-[8px] text-slate-500">掃碼查閱訂單</p>
-            <p id="qrOrderTypeHint" class="text-[8px] text-emerald-700 font-bold">送出後自動綁定</p>
+        <!-- QR Code 與 查驗資訊 (自適應縮放，徹底解決列印裁切與掃碼辨識) -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 p-1 rounded flex-shrink-0">
+          <div id="qrcodeBox" class="qr-box-container bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="text-[10px] md:text-xs leading-tight text-slate-600 space-y-1 text-left">
+            <p class="font-bold text-red-700 text-xs">📱 線上核對碼</p>
+            <p id="qrOrderLabel" class="font-mono text-[9px] text-slate-500 break-all font-semibold">掃碼查閱訂單</p>
+            <p id="qrOrderTypeHint" class="text-[9px] text-emerald-700 font-bold">送出後自動綁定</p>
           </div>
         </div>
       </div>
 
       <!-- 訂購單位基本資料欄 (學校地址 與 指送地點 獨立分開) -->
-      <div class="border border-slate-400 bg-slate-50/70 p-2 text-[11px] mb-2.5 rounded leading-tight">
+      <div class="border border-slate-400 bg-slate-50/70 p-2 text-[11px] info-grid mb-2.5 rounded leading-tight">
         <div class="grid grid-cols-12 gap-y-1.5 gap-x-2 items-center">
           
           <!-- 第一列：訂購單位 與 填報日期 -->
@@ -305,7 +365,7 @@
           <span>《非審定版》一 ～ 二年級 (低年級)</span>
           <span class="text-[10px] font-normal opacity-90">※ 課本、習作請自行外加教師用量 ｜ <span id="hintLowSemester" class="underline font-bold"></span></span>
         </div>
-        <table class="w-full text-[11px] border-collapse border border-slate-400 text-center">
+        <table class="w-full text-[11px] screen-text-lg border-collapse border border-slate-400 text-center">
           <thead>
             <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-400">
               <th class="border border-slate-400 py-1.5 px-1.5 w-36">系列名稱</th>
@@ -477,7 +537,7 @@
           <span>《審定版》三 ～ 六年級 (Super Fun)</span>
           <span class="text-[10px] font-normal opacity-90">※ 課本、習作請自行外加教師用量 ｜ <span id="hintMidSemester" class="underline font-bold"></span></span>
         </div>
-        <table class="w-full text-[11px] border-collapse border border-slate-400 text-center">
+        <table class="w-full text-[11px] screen-text-lg border-collapse border border-slate-400 text-center">
           <thead>
             <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-400">
               <th class="border border-slate-400 py-1.5 px-1.5 w-36">系列名稱</th>
@@ -856,15 +916,27 @@
     let currentQRCode = null;
     function updateQRCode(orderUrl) {
       const qrcodeBox = document.getElementById('qrcodeBox');
+      if (!qrcodeBox) return;
       qrcodeBox.innerHTML = '';
       currentQRCode = new QRCode(qrcodeBox, {
         text: orderUrl,
-        width: 48,
-        height: 48,
-        colorDark: "#1e293b",
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M
       });
+      // 強制隱藏底層 canvas，僅保留 img 圖片，徹底解決列印預覽時雙重重疊錯位破圖問題
+      setTimeout(() => {
+        const canvases = qrcodeBox.querySelectorAll('canvas');
+        canvases.forEach(c => c.style.display = 'none');
+        const imgs = qrcodeBox.querySelectorAll('img');
+        imgs.forEach(img => {
+          img.style.display = 'block';
+          img.style.width = '100%';
+          img.style.height = '100%';
+        });
+      }, 50);
     }
 
     function handleSchoolSearch(keyword) {
