@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>何嘉仁 國小英語教材訂購單 (B版 填報系統)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .font-serif-tc {
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* A4 嚴格單頁規格控制 (210mm x 297mm) */
+    @page {
+      size: A4 portrait;
+      margin: 4mm 8mm 4mm 8mm;
+    }
+
+    @media screen {
+      .a4-sheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 10px auto;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 2mm 3mm !important;
+      }
+      input, select, textarea {
+        border-color: transparent !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+
+    /* 擬真公司印泥印章 */
+    .company-stamp {
+      border: 2px solid #dc2626;
+      color: #dc2626;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      text-align: center;
+      border-radius: 4px;
+      position: relative;
+      background: rgba(254, 242, 242, 0.15);
+      user-select: none;
+      box-shadow: inset 0 0 2px rgba(220, 38, 38, 0.2);
+    }
+
+    /* 改單/增訂專屬標記戳章 */
+    .type-badge-stamp {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body class="py-2 px-1 min-h-screen">
+
+  <!-- 頂部功能工具列 (列印時隱藏) -->
+  <div class="max-w-[210mm] mx-auto mb-2 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 no-print">
+    
+    <!-- 工具列第一列：主標題、學期切換與學校搜尋 -->
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
+        <h1 class="text-xs md:text-sm font-bold text-slate-800">國小英語教材訂購系統 (B版)</h1>
+        
+        <!-- 目標訂購學期切換 -->
+        <div class="inline-flex rounded-lg border border-slate-300 p-0.5 bg-slate-100 text-xs">
+          <button id="btnTargetSem2" onclick="setManualOrderTarget('2')" class="px-2 py-0.5 rounded-md font-bold transition">
+            預訂下學期 (雙數冊)
+          </button>
+          <button id="btnTargetSem1" onclick="setManualOrderTarget('1')" class="px-2 py-0.5 rounded-md font-medium transition text-slate-600 hover:text-slate-900">
+            預訂上學期 (單數冊)
+          </button>
+        </div>
+
+        <span id="autoDetectBadge" class="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded font-mono">
+          🤖 時間推算中
+        </span>
+      </div>
+
+      <!-- 學校快速搜尋框 -->
+      <div class="relative flex-1 max-w-xs">
+        <div class="relative">
+          <input type="text" id="schoolSearchInput" oninput="handleSchoolSearch(this.value)" placeholder="🔍 搜尋 313 所學校 (如: 弓鞋、中山、平和...)" class="w-full pl-7 pr-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-slate-50 transition">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <!-- 下拉建議選單 -->
+        <div id="schoolDropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs">
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-1.5">
+        <button onclick="clearFormData()" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-300">
+          🔄 清空
+        </button>
+        <button onclick="submitOrder()" id="btnSubmit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          線上送出
+        </button>
+        <button onclick="window.print()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4h10z"></path></svg>
+          列印核章單
+        </button>
+      </div>
+    </div>
+
+    <!-- 工具列第二列：【一校多筆訂單管理】(首單 / 改單 / 增訂 切換條) -->
+    <div class="pt-1.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-1.5 text-xs bg-slate-50/70 p-1.5 rounded-lg">
+      <div class="flex items-center gap-1.5">
+        <span class="font-bold text-slate-700">📑 本校單據類別：</span>
+        
+        <div class="inline-flex rounded-md shadow-sm">
+          <button type="button" id="btnOrderTypeInitial" onclick="changeOrderType('initial')" class="px-2.5 py-0.5 text-xs font-bold rounded-l-md border border-slate-300 bg-white text-slate-800 hover:bg-slate-50">
+            首筆訂購單
+          </button>
+          <button type="button" id="btnOrderTypeModify" onclick="changeOrderType('modify')" class="px-2.5 py-0.5 text-xs font-medium border-t border-b border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200">
+            ✏️ 改單 (數量變更)
+          </button>
+          <button type="button" id="btnOrderTypeAppend" onclick="changeOrderType('append')" class="px-2.5 py-0.5 text-xs font-medium rounded-r-md border border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200">
+            ➕ 增訂 (追加補單)
+          </button>
+        </div>
+
+        <span id="orderTypeDesc" class="text-[10px] text-slate-500 font-medium ml-1">
+          (全校常規訂購)
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <span class="text-slate-600">已存單據：</span>
+        <select id="schoolOrderHistorySelect" onchange="loadSavedOrder(this.value)" class="border border-slate-300 rounded px-1.5 py-0.5 text-xs bg-white text-slate-700">
+          <option value="current">-- 填寫中新單據 --</option>
+        </select>
+        <button onclick="createNewOrderForSchool()" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold shadow-sm transition flex items-center gap-0.5">
+          ＋ 建立第二筆(改單/增訂)
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- A4 單據主紙張 (精確縮排以鎖定 A4 單頁) -->
+  <div class="a4-sheet bg-white px-4 py-3 text-slate-900 flex flex-col justify-between box-border border border-slate-200 rounded-sm">
+    
+    <div>
+      <!-- 頂部雙欄標頭：教材標題 + 訂單流水號 & QR Code + 單別大戳章 -->
+      <div class="border-b-2 border-red-700 pb-1 mb-1.5 flex justify-between items-center">
+        <div>
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <span class="bg-red-700 text-white font-black text-[11px] px-1.5 py-0.2 rounded tracking-widest">HESS 何嘉仁</span>
+            <span class="text-[10px] font-bold text-slate-600 tracking-wider">經銷商信函 附件二</span>
+            
+            <!-- 單別動態徽章 (首單 / 改單 / 增訂) -->
+            <span id="badgeOrderType" class="type-badge-stamp bg-slate-800 text-white text-[10px]">
+              首筆訂購單
+            </span>
+
+            <span id="badgeOrderNo" class="hidden text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded border border-amber-300"></span>
+          </div>
+          <h2 class="text-xl font-black text-slate-900 tracking-wide font-serif-tc flex items-center gap-1.5">
+            <span><span id="labelTargetYear" class="font-mono-num">115</span>學年度<span id="labelTargetSemester" class="text-red-700">第二學期</span> 國小【英語教材】訂購單</span>
+            <span id="labelOrderTypeTitle" class="text-red-700 text-lg font-bold">(B版)</span>
+          </h2>
+          <div class="text-[10px] text-slate-600 mt-0.5 flex items-center gap-2.5">
+            <span>經銷商：<strong class="text-slate-800">鍠嘉文化教育用品社</strong></span>
+            <span>電話：(04) 839-2577</span>
+            <span>傳真：(04) 828-5424</span>
+            <span id="salesmanInfo" class="text-red-800 font-bold hidden">服務業務：黃依華</span>
+          </div>
+        </div>
+
+        <!-- QR Code 與 查驗資訊 -->
+        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-300 p-1 rounded">
+          <div id="qrcodeBox" class="w-12 h-12 bg-white border border-slate-200 flex items-center justify-center p-0.5"></div>
+          <div class="text-[9px] leading-tight text-slate-600 space-y-0.5 text-left">
+            <p class="font-bold text-red-700">📱 線上核對碼</p>
+            <p id="qrOrderLabel" class="font-mono text-[8px] text-slate-500">掃碼查閱訂單</p>
+            <p id="qrOrderTypeHint" class="text-[8px] text-emerald-700 font-bold">送出後自動綁定</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 訂購單位基本資料欄 (學校地址 與 指送地點 獨立分開) -->
+      <div class="border border-slate-400 bg-slate-50/70 p-1.5 text-[11px] mb-1.5 rounded leading-tight">
+        <div class="grid grid-cols-12 gap-y-1 gap-x-1.5 items-center">
+          
+          <!-- 第一列：訂購單位 與 填報日期 -->
+          <div class="col-span-8 flex items-center">
+            <span class="font-bold text-slate-800 whitespace-nowrap">訂購單位：</span>
+            <input type="text" id="schoolCity" placeholder="縣市" class="w-10 text-center border-b border-slate-400 mx-0.5 outline-none font-semibold">
+            <span>縣/市</span>
+            <input type="text" id="schoolDistrict" placeholder="鄉鎮市區" class="w-12 text-center border-b border-slate-400 mx-0.5 outline-none font-semibold">
+            <span>區/鄉/鎮</span>
+            <input type="text" id="schoolName" placeholder="學校全名" class="w-24 text-center border-b border-slate-400 mx-0.5 outline-none font-bold text-slate-900 text-xs">
+            <span class="font-bold">國民小學</span>
+          </div>
+
+          <div class="col-span-4 flex items-center justify-end">
+            <span class="font-bold text-slate-800 whitespace-nowrap">填報日期：</span>
+            <input type="text" id="orderYear" class="w-7 text-center border-b border-slate-400 outline-none font-mono-num">
+            <span>年</span>
+            <input type="text" id="orderMonth" class="w-6 text-center border-b border-slate-400 outline-none font-mono-num">
+            <span>月</span>
+            <input type="text" id="orderDay" class="w-6 text-center border-b border-slate-400 outline-none font-mono-num">
+            <span>日</span>
+          </div>
+
+          <!-- 第二列：承辦人員 與 聯絡電話 -->
+          <div class="col-span-6 flex items-center">
+            <span class="font-bold text-slate-800 whitespace-nowrap">承辦人員：</span>
+            <input type="text" id="contactPerson" placeholder="請輸入老師姓名/職稱" class="border-b border-slate-400 flex-1 px-1 outline-none font-semibold text-slate-900">
+          </div>
+
+          <div class="col-span-6 flex items-center">
+            <span class="font-bold text-slate-800 whitespace-nowrap">聯絡電話：</span>
+            <input type="text" id="contactPhone" placeholder="市話分機或手機" class="border-b border-slate-400 flex-1 px-1 outline-none font-mono-num">
+          </div>
+
+          <!-- 第三列：學校地址 (自動帶入) -->
+          <div class="col-span-12 flex items-center pt-0.5">
+            <span class="font-bold text-slate-800 whitespace-nowrap">學校地址：</span>
+            <input type="text" id="schoolAddress" placeholder="[郵遞區號] 學校門牌地址" class="border-b border-slate-400 flex-1 px-1 outline-none text-slate-800 font-medium">
+          </div>
+
+          <!-- 第四列：指送地點 (校內送達位置，如：教務處設備組) -->
+          <div class="col-span-7 flex items-center pt-0.5">
+            <span class="font-bold text-red-800 whitespace-nowrap">指送地點：</span>
+            <input type="text" id="deliveryLocation" value="教務處" placeholder="校內處室 (例: 教務處、英語專科教室)" class="border-b border-slate-400 flex-1 px-1 outline-none text-red-950 font-bold bg-amber-50/40">
+            <span class="text-[9px] text-slate-400 ml-1 whitespace-nowrap">(校內放置點)</span>
+          </div>
+
+          <div class="col-span-5 flex items-center pt-0.5">
+            <span id="labelRefOrder" class="font-bold text-slate-700 whitespace-nowrap">單據備註：</span>
+            <input type="text" id="orderRemark" placeholder="例: 正式首訂 / 補進轉學生 / 班級增訂" class="border-b border-slate-400 flex-1 px-1 outline-none text-[11px] text-slate-800">
+          </div>
+
+          <!-- 第五列：送書期間 -->
+          <div class="col-span-12 flex items-center pt-1 border-t border-dashed border-slate-300">
+            <span class="font-bold text-red-800 whitespace-nowrap mr-1.5">送書期間 (可複選)：</span>
+            <div id="deliveryWeekContainer" class="flex flex-wrap items-center gap-2.5 text-slate-800 text-[10px]">
+              <!-- 週次由 JS 依照預訂目標自動渲染 -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 改單 / 增訂 警語橫幅提示 (列印時亦清楚保留) -->
+      <div id="bannerOrderNotice" class="hidden mb-1.5 p-1 rounded text-[11px] flex items-center justify-between border">
+        <span id="bannerOrderNoticeText" class="font-bold"></span>
+        <span class="text-[9px] opacity-80 font-mono">核章與出貨重要憑證</span>
+      </div>
+
+      <!-- 表格一：《非審定版》一～二年級 (低年級 - B版 4 大系列) -->
+      <div class="mb-1.5">
+        <div class="bg-red-800 text-white font-bold text-[11px] py-0.5 px-2 flex justify-between items-center rounded-t">
+          <span>《非審定版》一 ～ 二年級 (低年級)</span>
+          <span class="text-[10px] font-normal opacity-90">※ 課本、習作請自行外加教師用量 ｜ <span id="hintLowSemester" class="underline font-bold"></span></span>
+        </div>
+        <table class="w-full text-[11px] border-collapse border border-slate-400 text-center">
+          <thead>
+            <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-400">
+              <th class="border border-slate-400 py-0.5 px-1.5 w-36">系列名稱</th>
+              <th class="border border-slate-400 py-0.5 px-1 w-12">年級</th>
+              <th class="border border-slate-400 py-0.5 px-1 w-12">冊別</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-24 bg-amber-50/60">課本 (含線上聽)</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-24 bg-amber-50/60">習作 (含線上聽)</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-32 bg-blue-50/60">
+                教師用書<br><span class="text-[9px] font-normal text-slate-600">任教老師人數</span>
+              </th>
+              <th class="border border-slate-400 py-0.5 px-1">備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 【★ B版新增】WOW! STORY Phonics -->
+            <tr class="bg-red-50/20">
+              <td rowspan="2" class="border border-slate-400 py-0.5 px-1.5 font-bold bg-white text-red-950">
+                WOW! STORY<br><span class="text-[10px] font-black text-red-700 bg-red-100 px-1 py-0.2 rounded">Phonics</span>
+              </td>
+              <td class="border border-slate-400 py-0.5 text-slate-700">一年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g1_wosp">2</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="WOSP-G1" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="WOSP-G1" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="WOSP-G1" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr class="bg-red-50/20">
+              <td class="border border-slate-400 py-0.5 text-slate-700">二年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g2_wosp">4</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="WOSP-G2" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="WOSP-G2" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="WOSP-G2" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+
+            <!-- Wow! Story (低年級) -->
+            <tr>
+              <td rowspan="2" class="border border-slate-400 py-0.5 px-1.5 font-bold bg-white text-slate-900">
+                WOW! STORY<br><span class="text-[9px] text-slate-500 font-normal">(低年級)</span>
+              </td>
+              <td class="border border-slate-400 py-0.5 text-slate-700">一年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g1_wow">2</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="Wow-G1" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="Wow-G1" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="Wow-G1" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400 py-0.5 text-slate-700">二年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g2_wow">4</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="Wow-G2" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="Wow-G2" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="Wow-G2" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+
+            <!-- Fun World (低年級) -->
+            <tr class="bg-slate-50/40">
+              <td rowspan="2" class="border border-slate-400 py-0.5 px-1.5 font-bold bg-white text-slate-900">
+                Fun World<br><span class="text-[9px] text-slate-500 font-normal">(低年級)</span>
+              </td>
+              <td class="border border-slate-400 py-0.5 text-slate-700">一年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g1_fw">2</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="FW-G1" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="FW-G1" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="FW-G1" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr class="bg-slate-50/40">
+              <td class="border border-slate-400 py-0.5 text-slate-700">二年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g2_fw">4</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="FW-G2" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="FW-G2" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="FW-G2" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+
+            <!-- Go Magic! (低年級) -->
+            <tr>
+              <td rowspan="2" class="border border-slate-400 py-0.5 px-1.5 font-bold bg-white text-slate-900">
+                Go Magic!<br><span class="text-[9px] text-slate-500 font-normal">(低年級)</span>
+              </td>
+              <td class="border border-slate-400 py-0.5 text-slate-700">一年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g1_gm">2</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="GM-G1" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="GM-G1" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="GM-G1" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400 py-0.5 text-slate-700">二年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g2_gm">4</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="GM-G2" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="GM-G2" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="GM-G2" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 表格二：《審定版》三～六年級 (中高年級 Super Fun) -->
+      <div class="mb-1.5">
+        <div class="bg-red-800 text-white font-bold text-[11px] py-0.5 px-2 flex justify-between items-center rounded-t">
+          <span>《審定版》三 ～ 六年級 (Super Fun)</span>
+          <span class="text-[10px] font-normal opacity-90">※ 課本、習作請自行外加教師用量 ｜ <span id="hintMidSemester" class="underline font-bold"></span></span>
+        </div>
+        <table class="w-full text-[11px] border-collapse border border-slate-400 text-center">
+          <thead>
+            <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-400">
+              <th class="border border-slate-400 py-0.5 px-1.5 w-36">系列名稱</th>
+              <th class="border border-slate-400 py-0.5 px-1 w-12">年級</th>
+              <th class="border border-slate-400 py-0.5 px-1 w-12">冊別</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-24 bg-amber-50/60">課本 (含線上聽)</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-24 bg-amber-50/60">習作 (含線上聽)</th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-28 bg-emerald-50/60">
+                學生電子書<br><span class="text-[9px] font-normal text-emerald-800">開通卡 (另計)</span>
+              </th>
+              <th class="border border-slate-400 py-0.5 px-1.5 w-32 bg-blue-50/60">
+                教師用書<br><span class="text-[9px] font-normal text-slate-600">任教老師人數</span>
+              </th>
+              <th class="border border-slate-400 py-0.5 px-1">備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="4" class="border border-slate-400 py-1 px-1.5 font-bold bg-white text-slate-900">
+                Super Fun<br><span class="text-[9px] text-slate-500 font-normal">(審定版)</span>
+              </td>
+              <td class="border border-slate-400 py-0.5 text-slate-700">三年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g3_sf">2</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G3" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G3" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-emerald-50/30">
+                <input type="number" min="0" data-base="SF-G3" data-kind="開通卡" class="w-full text-center outline-none font-mono-num font-bold text-emerald-900 calc-input q-card" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="SF-G3" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400 py-0.5 text-slate-700">四年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g4_sf">4</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G4" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G4" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-emerald-50/30">
+                <input type="number" min="0" data-base="SF-G4" data-kind="開通卡" class="w-full text-center outline-none font-mono-num font-bold text-emerald-900 calc-input q-card" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="SF-G4" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400 py-0.5 text-slate-700">五年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g5_sf">6</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G5" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G5" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-emerald-50/30">
+                <input type="number" min="0" data-base="SF-G5" data-kind="開通卡" class="w-full text-center outline-none font-mono-num font-bold text-emerald-900 calc-input q-card" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="SF-G5" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400 py-0.5 text-slate-700">六年級</td>
+              <td class="border border-slate-400 py-0.5 font-mono-num font-bold text-red-700 text-xs" id="vol_g6_sf">8</td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G6" data-kind="課本" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-textbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-amber-50/30">
+                <input type="number" min="0" data-base="SF-G6" data-kind="習作" class="w-full text-center outline-none font-mono-num font-bold text-slate-900 calc-input q-workbook" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-emerald-50/30">
+                <input type="number" min="0" data-base="SF-G6" data-kind="開通卡" class="w-full text-center outline-none font-mono-num font-bold text-emerald-900 calc-input q-card" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1 bg-blue-50/30">
+                <input type="number" min="0" data-base="SF-G6" data-kind="教用" class="w-full text-center outline-none font-mono-num text-slate-800 calc-input q-teacher" oninput="calculateSummary()">
+              </td>
+              <td class="border border-slate-400 py-0.5 px-1">
+                <input type="text" class="w-full text-center outline-none text-[10px] text-slate-600">
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="bg-slate-100 font-bold border-t-2 border-slate-400 text-xs">
+              <td colspan="3" class="border border-slate-400 py-1 px-1.5 text-right">訂單總量合計：</td>
+              <td class="border border-slate-400 py-1 px-1 font-mono-num text-red-700 font-bold" id="totalTextbook">0 本</td>
+              <td class="border border-slate-400 py-1 px-1 font-mono-num text-red-700 font-bold" id="totalWorkbook">0 本</td>
+              <td class="border border-slate-400 py-1 px-1 font-mono-num text-emerald-800 font-bold" id="totalCard">0 張</td>
+              <td class="border border-slate-400 py-1 px-1 font-mono-num text-blue-900 font-bold" id="totalTeacher">0 份</td>
+              <td class="border border-slate-400 py-1 px-1 text-[9px] text-slate-500">自動加總</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- 底部：回傳指示、經銷商蓋章區、學校審核區 -->
+    <div class="mt-0.5 border-t border-slate-300 pt-1">
+      <div class="grid grid-cols-12 gap-2 text-[11px] items-stretch">
+        
+        <!-- 左側：填寫與回傳說明 + 經銷商通訊 -->
+        <div class="col-span-7 flex flex-col justify-between pr-2 border-r border-slate-200">
+          <div class="space-y-0.5 text-slate-700 leading-tight">
+            <div class="flex items-center gap-1">
+              <span class="w-1.5 h-3 bg-red-700 rounded-sm"></span>
+              <span class="font-bold text-slate-900 text-xs">訂購注意事項與回傳指示：</span>
+            </div>
+            <p class="text-[10px] text-slate-600">
+              1. 填寫完畢請點擊上方「線上送出」，並列印此單呈上級核章。
+            </p>
+            <div class="bg-red-50/60 border border-red-200 p-1 rounded text-[10px] space-y-0.5">
+              <p><span class="font-bold text-red-900">回傳傳真 Fax：</span><span class="font-mono-num font-bold text-red-800 text-[11px]">(04) 828-5424</span></p>
+              <p><span class="font-bold text-red-900">服務電話 Tel：</span><span class="font-mono-num font-semibold text-slate-800">(04) 839-2577</span></p>
+              <p><span class="font-bold text-red-900">門市通訊處：</span>彰化縣員林市員大路一段250巷15號</p>
+            </div>
+            <p class="text-[9px] text-slate-500">
+              2. 教師用書贈送數量請依各校實際任教該教材之任課教師人數覈實填寫。<br>
+              3. 如有任何訂單、開通卡使用或收件地址調整，歡迎隨時來電洽詢業務專員。
+            </p>
+          </div>
+
+          <!-- 經銷商核對蓋章 -->
+          <div class="mt-1 pt-0.5 border-t border-dashed border-slate-300 flex items-center justify-between">
+            <span class="font-bold text-slate-800 text-xs">經銷商核章：</span>
+            <div class="flex items-center gap-2">
+              <div class="company-stamp w-10 h-10 text-[7px] p-0.5 shadow-sm transform -rotate-1">
+                <div class="grid grid-cols-3 gap-0.5 w-full h-full font-serif-tc font-bold">
+                  <span class="flex items-center justify-center">用</span>
+                  <span class="flex items-center justify-center">化</span>
+                  <span class="flex items-center justify-center">鍠</span>
+                  <span class="flex items-center justify-center">品</span>
+                  <span class="flex items-center justify-center">教</span>
+                  <span class="flex items-center justify-center">嘉</span>
+                  <span class="flex items-center justify-center">社</span>
+                  <span class="flex items-center justify-center">育</span>
+                  <span class="flex items-center justify-center">文</span>
+                </div>
+              </div>
+              <div class="company-stamp w-8 h-8 text-[8px] p-0.5 shadow-sm transform rotate-1">
+                <div class="grid grid-cols-2 gap-0.5 w-full h-full font-serif-tc font-bold leading-none">
+                  <span class="flex items-center justify-center">依</span>
+                  <span class="flex items-center justify-center">黃</span>
+                  <span class="flex items-center justify-center">華</span>
+                  <span class="flex items-center justify-center">印</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：學校審核簽章欄 -->
+        <div class="col-span-5 flex flex-col justify-between pl-1">
+          <div>
+            <div class="text-[11px] font-bold text-slate-800 mb-1 flex items-center gap-1">
+              <span class="w-1.5 h-3 bg-slate-800 rounded-sm"></span>
+              <span>學校簽核審查欄：</span>
+            </div>
+            <div class="grid grid-cols-3 border border-slate-400 rounded text-center divide-x divide-slate-400 bg-white">
+              <div>
+                <div class="text-[10px] text-slate-700 font-bold py-0.5 border-b border-slate-300 bg-slate-100">承辦人</div>
+                <div class="h-11 flex items-end justify-center pb-0.5 text-[10px] text-slate-400 font-serif-tc">
+                  蓋章 / 簽名
+                </div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-700 font-bold py-0.5 border-b border-slate-300 bg-slate-100">主任</div>
+                <div class="h-11 flex items-end justify-center pb-0.5 text-[10px] text-slate-400 font-serif-tc">
+                  蓋章 / 簽名
+                </div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-700 font-bold py-0.5 border-b border-slate-300 bg-slate-100">校長</div>
+                <div class="h-11 flex items-end justify-center pb-0.5 text-[10px] text-slate-400 font-serif-tc">
+                  蓋章 / 簽名
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center text-[9px] text-slate-500 pt-0.5 border-t border-slate-200 mt-0.5">
+            ※ 本訂購單經學校核章並回傳後，視同正式要約成立。
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SCHOOL_DATABASE = [{"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "中山", "phone": "04-7222033", "address": "彰化市中山路二段678號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "民生", "phone": "04-7224122", "address": "彰化市民生路338號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "平和", "phone": "04-7222355", "address": "彰化市中正路二段450號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "南郭", "phone": "04-7280366", "address": "彰化市中興路98號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "南興", "phone": "04-7622827", "address": "彰化市中山路一段213號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "東芳", "phone": "04-7523250", "address": "彰化市彰馬路45號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "泰和", "phone": "04-7222433", "address": "彰化市泰和路二段145巷1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "三民", "phone": "04-7384775", "address": "彰化市田中里田中路125號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "聯興", "phone": "04-7384340", "address": "彰化市牛埔里一心南街208號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "大竹", "phone": "04-7381436", "address": "彰化市彰南路二段164巷41號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "國聖", "phone": "04-7321093", "address": "彰化市中山路三段608號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "快官", "phone": "04-7384814", "address": "彰化市彰南路4段566號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "石牌", "phone": "04-7381672", "address": "彰化市石牌里田坑路一段九號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "忠孝", "phone": "04-7523944", "address": "彰化縣彰化市忠誠路61號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "信義", "phone": "04-7635888", "address": "彰化市向陽里向陽街168號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "芬園", "phone": "049-2522208", "address": "彰化縣芬園鄉社口村彰南路四段27巷28號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "富山", "phone": "049-2522084", "address": "彰化縣芬園鄉大埔村大埔路6號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "寶山", "phone": "049-2525010", "address": "彰化縣芬園鄉圳墘村彰南路二段36號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "同安", "phone": "04-8590502", "address": "彰化縣芬園鄉中崙村大彰路2段400巷36號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "文德", "phone": "04-8590012", "address": "彰化縣芬園鄉大竹村大彰路一段617號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芬園鄉", "name": "茄荖", "phone": "049-2523018", "address": "芬園鄉茄荖村嘉北街96號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "花壇", "phone": "04-7862029", "address": "彰化縣花壇鄉長沙村學前路 108 號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "文祥", "phone": "04-7862255", "address": "彰化縣花壇鄉劉厝村明雅街131號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "華南", "phone": "04-7863225", "address": "彰化縣花壇鄉中庄村中橋街226號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "僑愛", "phone": "04-7863227", "address": "彰化縣花壇鄉中口村中山路二段471號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "三春", "phone": "04-7862154", "address": "彰化縣花壇鄉三芬路47號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "花壇鄉", "name": "白沙", "phone": "04-7863224", "address": "彰化縣花壇鄉彰員路三段225號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "和美", "phone": "04-7552005", "address": "彰化縣和美鎮和平街19號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "和東", "phone": "04-7552724", "address": "彰化縣和美鎮彰美路五段210號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "大嘉", "phone": "04-7552524", "address": "彰化縣和美鎮彰和路三段50號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "大榮", "phone": "04-7636814", "address": "彰化縣和美鎮嘉佃路296號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "新庄", "phone": "04-7353267", "address": "彰化縣和美鎮彰新路二段500號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "培英", "phone": "04-7552430", "address": "彰化縣和美鎮彰新路5段310號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "和美鎮", "name": "和仁", "phone": "04-7575407", "address": "508彰化縣和美鎮仁愛路279號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "線西鄉", "name": "線西", "phone": "04-7585075", "address": "彰化縣線西鄉中央路二段135號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "線西鄉", "name": "曉陽", "phone": "04-7585370", "address": "50742彰化縣線西鄉頂犁村158之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "伸港鄉", "name": "新港", "phone": "04-7982310", "address": "彰化縣伸港鄉新港村和平路60號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "伸港鄉", "name": "伸東", "phone": "04-7982314", "address": "彰化縣伸港鄉七嘉村中華路565號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "伸港鄉", "name": "伸仁", "phone": "04-7982324", "address": "彰化縣伸港鄉曾家村曾家路3之15號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "伸港鄉", "name": "大同", "phone": "04-7988080", "address": "彰化縣伸港鄉彰新路七段724號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "鹿港", "phone": "04-7772038", "address": "彰化縣鹿港鎮三民路192號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "文開", "phone": "04-7772042", "address": "彰化縣505鹿港鎮新宮里文開路60號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "洛津", "phone": "04-7772041", "address": "彰化縣鹿港鎮洛津里公園三路51號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "海埔", "phone": "04-7781316", "address": "彰化縣鹿港鎮鹿草路二段八八九號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "新興", "phone": "04-7785911", "address": "彰化縣鹿港鎮詔安里某旦巷85號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "草港", "phone": "04-7712834", "address": "彰化縣鹿港鎮草中里頂草路四段251號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "頂番", "phone": "04-7711433", "address": "彰化縣鹿港鎮頂草路一段100號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "東興", "phone": "04-7751591", "address": "彰化縣鹿港鎮東崎里東崎七巷52號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "鹿東", "phone": "04-7756521", "address": "鹿港鎮長安路125號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "管嶼", "phone": "04-7702949", "address": "彰化縣福興鄉沿海路三段100號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "文昌", "phone": "04-7702812", "address": "彰化縣福興鄉鎮平街1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "西勢", "phone": "04-7772317", "address": "彰化縣福興鄉西勢村員鹿路二段412號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "大興", "phone": "04-7792251", "address": "彰化縣福興鄉外埔村復興路15號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "永豐", "phone": "04-7792748", "address": "50660彰化縣福興鄉番社村80號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "日新", "phone": "04-7773861", "address": "50648彰化縣福興鄉番婆村彰鹿路6段546號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "福興鄉", "name": "育新", "phone": "04-7802521", "address": "彰化縣福興鄉二港村福正路4號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "秀水", "phone": "04-7692756", "address": "彰化縣秀水鄉中山路257號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "馬興", "phone": "04-7526247", "address": "彰化縣秀水鄉馬興村培英巷1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "華龍", "phone": "04-7692713", "address": "彰化縣秀水鄉花秀路51號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "明正", "phone": "04-7692533", "address": "彰化縣秀水鄉埔崙村彰水路二段341號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "陝西", "phone": "04-7692242、04-7698067", "address": "秀水鄉金興村番花路261號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "秀水鄉", "name": "育民", "phone": "04-7694845", "address": "彰化縣秀水鄉下崙村民生街262號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "溪湖", "phone": "04-8853126", "address": "彰化縣溪湖鎮二溪路一段35號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "東溪", "phone": "04-8852034", "address": "彰化縣溪湖鎮員鹿路一段538號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "湖西", "phone": "04-8852234", "address": "彰化縣溪湖鎮大突里北聖20號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "湖東", "phone": "04-8852062", "address": "彰化縣溪湖鎮大溪路二段423號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "湖南", "phone": "04-8816845", "address": "彰化縣溪湖鎮大竹里彰水路二段725號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "媽厝", "phone": "04-8853225", "address": "彰化縣溪湖鎮媽厝里湳底路67號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "埔鹽", "phone": "04-8852882", "address": "彰化縣埔鹽鄉埔南村彰水路1段252號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "大園", "phone": "04-8853760", "address": "彰化縣埔鹽鄉豐澤村埔打路45-1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "南港", "phone": "04-8850169", "address": "埔鹽鄉埔菜路29-2號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "好修", "phone": "04-8653555", "address": "彰化縣埔鹽鄉好修村員鹿路二段149號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "永樂", "phone": "04-8652263", "address": "彰化縣埔鹽鄉永樂村永樂路600號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "新水", "phone": "04-8651112", "address": "51646彰化縣埔鹽鄉新水村大新路一巷15號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔鹽鄉", "name": "天盛", "phone": "04-8650842", "address": "彰化縣埔鹽鄉天盛村番金路68-1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "埔心", "phone": "04-8291494", "address": "彰化縣埔心鄉義民村員鹿路二段254號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "太平", "phone": "04-8226049", "address": "彰化縣埔心鄉太平村太平路289號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "舊館", "phone": "04-8292025", "address": "彰化縣埔心鄉員鹿路四段201號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "羅厝", "phone": "04-8292861", "address": "513彰化縣埔心鄉羅厝村文昌東路100號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "鳳霞", "phone": "04-8294072", "address": "彰化縣埔心鄉二重村五通南路82號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "梧鳳", "phone": "04-8291964", "address": "埔心鄉大溪路三段175號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埔心鄉", "name": "明聖", "phone": "04-8295395", "address": "埔心鄉瓦北村西安南路178號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "員林", "phone": "04-8320145", "address": "員林市三民東街221號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "育英", "phone": "04-8320130", "address": "彰化縣員林市黎明里光明街31號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "靜修", "phone": "04-48320341", "address": "彰化縣員林市靜修路74號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "僑信", "phone": "04-8320810", "address": "51049彰化縣員林市中山路二段280號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "員東", "phone": "04-8311022", "address": "510-44彰化縣員林市員東路二段12號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "饒明", "phone": "04-8320059", "address": "彰化縣員林市中央里員集路二段一三一號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "東山", "phone": "04-48310749", "address": "510032彰化縣員林市南東里山腳路四段212號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "青山", "phone": "04-8310401", "address": "彰化縣員林市出水里湶洲巷3號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "員林市", "name": "明湖", "phone": "04-8310743", "address": "彰化縣員林市湖水里湖水路277號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大村鄉", "name": "大村", "phone": "04-8522794", "address": "515彰化縣大村鄉中正西路381號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大村鄉", "name": "大西", "phone": "04-8522677", "address": "彰化縣大村鄉大崙路10-55號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大村鄉", "name": "村上", "phone": "04-8533680", "address": "彰化縣大村鄉村上村中山路二段242號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大村鄉", "name": "村東", "phone": "04-8526328", "address": "彰化縣大村鄉福興村山腳路102之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "永靖鄉", "name": "永靖", "phone": "04-8221812", "address": "彰化縣永靖鄉永東村中山路2段65號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "永靖鄉", "name": "福德", "phone": "04-8224154", "address": "彰化縣永靖鄉永南村福德巷36號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "永靖鄉", "name": "永興", "phone": "04-8221714", "address": "51246彰化縣永靖鄉東寧村永興路二段32號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "永靖鄉", "name": "福興", "phone": "04-8231023", "address": "彰化縣永靖鄉福興村永福路二段160號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "永靖鄉", "name": "德興", "phone": "04-8222158", "address": "彰化縣永靖鄉竹子村竹後巷47號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "田中", "phone": "04-8742013", "address": "彰化縣田中鎮南路里中州路一段177號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "三潭", "phone": "04-8742254", "address": "彰化縣田中鎮中正路715號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "大安", "phone": "04-8742327", "address": "彰化縣田中鎮三安里大安路一段200號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "內安", "phone": "921377459", "address": "中南路3段54號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "東和", "phone": "04-8742708", "address": "彰化縣田中鎮山腳路4段188巷109號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "明禮", "phone": "04-8742344", "address": "彰化縣田中鎮三光里民光路一段394號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "社頭", "phone": "04-8732039", "address": "社頭鄉社頭村社斗路一段258號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "橋頭", "phone": "04-8731265", "address": "彰化縣社頭鄉橋頭村員集路三段528號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "朝興", "phone": "04-8732484", "address": "彰化縣社頭鄉社石路91號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "清水", "phone": "04-8731285", "address": "彰化縣社頭鄉清水村山腳路一段486號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "湳雅", "phone": "04-8735007", "address": "彰化縣社頭鄉湳雅村山腳路三段395號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "崙雅", "phone": "04-8710945", "address": "彰化縣社頭鄉員集路一段615號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "社頭鄉", "name": "舊社", "phone": "04-8711001", "address": "彰化縣社頭鄉社石路956號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二水鄉", "name": "二水", "phone": "04-8792040", "address": "彰化縣二水鄉文化村光文路119號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二水鄉", "name": "復興", "phone": "04-8745935", "address": "彰化縣二水鄉復興村員集路五段472號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二水鄉", "name": "源泉", "phone": "04-8792304", "address": "彰化縣二水鄉大園村員集路二段316號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "北斗鎮", "name": "北斗", "phone": "04-8882008", "address": "彰化縣北斗鎮文苑路一段32號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "北斗鎮", "name": "萬來", "phone": "04-8882119", "address": "彰化縣北斗鎮文賢街35號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "北斗鎮", "name": "螺青", "phone": "04-8882031", "address": "彰化縣北斗鎮東光里斗中路712號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "北斗鎮", "name": "大新", "phone": "04-8882640", "address": "彰化縣北斗鎮大新路556號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "北斗鎮", "name": "螺陽", "phone": "04-8882039", "address": "彰化縣北斗鎮斗苑路二段150號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田尾鄉", "name": "田尾", "phone": "04-8832745", "address": "[522014]彰化縣田尾鄉中山路一段449號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田尾鄉", "name": "南鎮", "phone": "04-8227962", "address": "彰化縣田尾鄉南鎮村光復路一段295號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田尾鄉", "name": "陸豐", "phone": "04-8222563", "address": "彰化縣田尾鄉陸豐村民生路三段200號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田尾鄉", "name": "仁豐", "phone": "04-8830347", "address": "田尾鄉新厝村中正路二段101號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "埤頭", "phone": "04-8922019", "address": "彰化縣埤頭鄉埤頭村中南路145號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "合興", "phone": "04-8922030", "address": "彰化縣埤頭鄉合興村文鄉路161號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "豐崙", "phone": "04-8922136", "address": "彰化縣埤頭鄉豐崙村校前路50號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "芙朝", "phone": "04-8925057", "address": "彰化縣埤頭鄉芙朝村芙朝路205號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "中和", "phone": "04-8895768", "address": "彰化縣埤頭鄉中和村溪林路284號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "埤頭鄉", "name": "大湖", "phone": "04-8922009", "address": "彰化縣埤頭鄉大湖村大湖路260號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "溪州", "phone": "04-8895013", "address": "彰化縣溪州鄉尾厝村中山路三段451號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "僑義", "phone": "04-8892244", "address": "彰化縣溪州鄉中山路二段326號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "三條", "phone": "04-8895080", "address": "彰化縣溪州鄉三條村中央路二段三十一號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "水尾", "phone": "04-8892442", "address": "彰化縣溪州鄉水尾村太平路137號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "潮洋", "phone": "04-8803059", "address": "彰化縣溪州鄉潮洋村陸軍路一段146號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "成功", "phone": "04-8802225", "address": "彰化縣溪州鄉成功村登山路2段365號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "圳寮", "phone": "04-8802165", "address": "彰化縣溪州鄉圳寮村下樹巷29號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "大莊", "phone": "04-8802438", "address": "彰化縣溪州鄉大庄村中橫巷一號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪州鄉", "name": "南州", "phone": "04-48892224", "address": "彰化縣溪州鄉溪州村公園路９５號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "二林", "phone": "04-8960057", "address": "52641二林鎮東和里斗苑路5段22號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "興華", "phone": "04-8962594", "address": "彰化縣二林鎮竹林路三段393號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "中正", "phone": "04-8964461", "address": "彰化縣二林鎮南光里建興街80號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "育德", "phone": "04-8962574", "address": "彰化縣二林鎮外竹里中南巷41-1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "香田", "phone": "04-8960654", "address": "彰化縣二林鎮香田里儒林路10之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "廣興", "phone": "04-8962584", "address": "彰化縣二林鎮廣興里廣興巷2-1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "萬興", "phone": "04-8682759", "address": "彰化縣二林鎮永興里中央南街2號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "新生", "phone": "04-8964330", "address": "彰化縣二林鎮趙甲里鎮平巷59號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "中興", "phone": "04-8683458", "address": "526彰化縣二林鎮華崙里光復路73號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "萬合", "phone": "04-8902164", "address": "彰化縣二林鎮萬合里江山巷1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大城鄉", "name": "大城", "phone": "04-8941135", "address": "彰化縣大城鄉中平路176號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大城鄉", "name": "西港", "phone": "04-8941029", "address": "彰化縣大城鄉東港村中央路2號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大城鄉", "name": "美豐", "phone": "04-8941660", "address": "彰化縣大城鄉三豐村東盛路一號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "大城鄉", "name": "潭墘", "phone": "04-48941009", "address": "彰化縣大城鄉潭墘村潭城路1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "竹塘鄉", "name": "竹塘", "phone": "04-8972039", "address": "彰化縣竹塘鄉竹塘村文化街20號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "竹塘鄉", "name": "田頭", "phone": "04-8972189", "address": "彰化縣竹塘鄉田頭村光明路60號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "竹塘鄉", "name": "民靖", "phone": "04-8972693", "address": "彰化縣竹塘鄉民靖村文昌路152號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "竹塘鄉", "name": "長安", "phone": "04-8972694", "address": "彰化縣竹塘鄉長安村東陽路二段123號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "竹塘鄉", "name": "土庫", "phone": "04-8972140", "address": "彰化縣竹塘鄉土庫村東陽路一段362號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "芳苑", "phone": "04-8983993", "address": "彰化縣芳苑鄉芳苑村斗苑路芳苑段230號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "後寮", "phone": "04-8983184", "address": "彰化縣芳苑鄉後寮村芳寮路30號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "民權", "phone": "04-8932625", "address": "彰化縣芳苑鄉五俊村新生巷五之一號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "育華", "phone": "04-8933261", "address": "彰化縣芳苑鄉永興村太平路300號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "草湖", "phone": "04-8933327", "address": "52862彰化縣芳苑鄉文津村芳草路66號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "建新", "phone": "04-8862328", "address": "彰化縣芳苑鄉新生村草漢路草二段86號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "漢寶", "phone": "04-8991062", "address": "彰化縣芳苑鄉漢寶村020鄰草漢路漢寶段541號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "王功", "phone": "04-8932182", "address": "彰化縣芳苑鄉王功村功湖路王功段481號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "新寶", "phone": "04-8932885", "address": "彰化縣芳苑鄉芳漢路新寶段129巷100號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "芳苑鄉", "name": "路上", "phone": "04-8982014", "address": "彰化縣芳苑鄉路上村新上路１２號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "彰化市", "name": "大成", "phone": "04-7353457", "address": "彰化市自強路303號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "彰化", "fullCity": "彰化縣", "district": "田中鎮", "name": "新民", "phone": "04-8756166", "address": "彰化縣田中鎮新民里公館路320號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "溪湖鎮", "name": "湖北", "phone": "04-8613618", "address": "彰化縣溪湖鎮太平里地政路201 號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "二林鎮", "name": "原斗", "phone": "04-8904600、04-8902322", "address": "彰化縣二林鎮原斗里原竹路872號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "彰化", "fullCity": "彰化縣", "district": "鹿港鎮", "name": "鹿江", "phone": "04-7770557", "address": "彰化縣鹿港鎮自由路300號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "南投", "phone": "049-2222038", "address": "[54056]南投縣南投市彰南路一段1059號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "平和", "phone": "049-2222028", "address": "[54049]南投縣南投市平和里育樂路62號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "新豐", "phone": "049-2251804", "address": "[54068]南投縣南投市彰南路三段221號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "營盤", "phone": "049-2335882", "address": "[54047]南投縣南投市營南里營盤路136號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "西嶺", "phone": "049-2291354", "address": "[54070]南投縣南投市鳳鳴里八卦路894號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "德興", "phone": "049-2359050", "address": "[54041]南投縣南投市內興里中興路200號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "光華", "phone": "049-2332549", "address": "[54044]南投縣南投市中興新村光華四路2號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "光榮", "phone": "049-2332550", "address": "[54043]南投縣南投市光榮里八鄰光榮北路19號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "文山", "phone": "049-2291394", "address": "[54070]南投縣南投市福山里八卦路349號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "僑建", "phone": "049-2253245", "address": "[54069]南投縣南投市彰南路三段847號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "漳和", "phone": "049-2224087", "address": "[54061]南投縣南投市文林路16號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "嘉和", "phone": "049-2222430", "address": "[54056]南投縣南投市彰南路一段639巷80號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "光復", "phone": "049-2332587", "address": "[54043]南投縣南投市光明里光明一路67號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "千秋", "phone": "049-2229405", "address": "[54051]南投縣南投市千秋里千秋路131巷1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "漳興", "phone": "049-2224013", "address": "[54062]南投縣南投市復興路669號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "南投市", "name": "康壽", "phone": "049-2243457", "address": "[54062]南投縣南投市南陽路269號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "埔里", "phone": "049-2982034", "address": "[54555]南投縣埔里鎮西門里西康路127號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "南光", "phone": "049-2982025", "address": "[54550]南投縣埔里鎮杷城里中正路251號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "育英", "phone": "049-2982144", "address": "[54547]南投縣埔里鎮清新里育英街20號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "史港", "phone": "049-2931521", "address": "[54558]南投縣埔里鎮史港里獅子路9號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "愛蘭", "phone": "049-2912514", "address": "[54546]南投縣埔里鎮愛蘭里鐵山路7號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "溪南", "phone": "049-2904517", "address": "[54548]南投縣埔里鎮溪南里珠生路68號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "水尾", "phone": "049-2932506", "address": "[54544]南投縣埔里鎮一新里永豐路92號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "桃源", "phone": "049-2913450", "address": "[54561]南投縣埔里鎮桃米里桃米巷68號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "麒麟", "phone": "049-2925941", "address": "[54550]南投縣埔里鎮麒麟里武界路7號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "均頭", "phone": "049-2980723", "address": "545南投縣埔里鎮水頭路48號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "太平", "phone": "049-2931385", "address": "[54559]南投縣埔里鎮合成里西安路三段167巷35號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "忠孝", "phone": "049-2931582", "address": "[54558]南投縣埔里鎮牛眠里守城路28號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "中峰", "phone": "049-2982542", "address": "[54560]南投縣埔里鎮中山路一段228號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "埔里鎮", "name": "大成", "phone": "049-2916517", "address": "[54551]南投縣埔里鎮中山路三段565號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "草屯", "phone": "049-2362007", "address": "[54249]南投縣草屯鎮玉峰里玉屏路210號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "新庄", "phone": "049-2333104", "address": "[54253]南投縣草屯鎮新庄里新庄三路32號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "碧峰", "phone": "049-2334304", "address": "[54259]南投縣草屯鎮碧峰里立人路439號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "土城", "phone": "049-2552024", "address": "[54246]南投縣草屯鎮土城里中正路189號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "雙冬", "phone": "049-2571362", "address": "[54245]南投縣草屯鎮雙冬里中正路34號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "炎峰", "phone": "049-2333221", "address": "[54261]南投縣草屯鎮中興路101號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "中原", "phone": "049-2554631", "address": "[54248]南投縣草屯鎮中原里坪腳巷20號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "平林", "phone": "049-2571761", "address": "[54245]南投縣草屯鎮健行路65巷90號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "坪頂", "phone": "049-2552074", "address": "[54244]南投縣草屯鎮坪頂里南坪路40號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "僑光", "phone": "049-2333684", "address": "[54252]南投縣草屯鎮稻香路20-2號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "北投", "phone": "049-2333614", "address": "[54257]南投縣草屯鎮北投路文教巷43號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "敦和", "phone": "049-2365074", "address": "[54257]南投縣草屯鎮敦和路72-6號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "富功", "phone": "049-2569213", "address": "[54243]南投縣草屯鎮富寮里中正路567號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "草屯鎮", "name": "虎山", "phone": "049-2339107", "address": "[54262]南投縣草屯鎮新生路76號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "竹山", "phone": "049-2642016", "address": "[55751]南投縣竹山鎮延和里向學街32號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "延平", "phone": "049-2642450", "address": "[55782]南投縣竹山鎮集山路二段1161號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "社寮", "phone": "049-2622020", "address": "[557014]南投縣竹山鎮社寮里集山路一段1723號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "過溪", "phone": "049-2642573", "address": "[55759]南投縣竹山鎮福興里鯉南路136號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "大鞍", "phone": "049-2841009", "address": "[55770]南投縣竹山鎮大鞍里竹寮巷21號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "瑞竹", "phone": "049-2711024", "address": "[55772]南投縣竹山鎮瑞竹里鯉南路251號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "秀林", "phone": "049-2647285", "address": "[55769]南投縣竹山鎮頂林路456號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "雲林", "phone": "049-2643321", "address": "[55748]南投縣竹山鎮雲林里大明路666號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "鯉魚", "phone": "049-2644984", "address": "[55761]南投縣竹山鎮鯉魚里鯉行路92號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "桶頭", "phone": "049-2711034", "address": "[55772]南投縣竹山鎮鯉南路312之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "中州", "phone": "049-2622030", "address": "[55792]南投縣竹山鎮集山路一段955號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "中和", "phone": "049-2642424", "address": "[55762]南投縣竹山鎮集山路三段1394號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "竹山鎮", "name": "前山", "phone": "049-2660662", "address": "[55755]南投縣竹山鎮自強路100號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "集集鎮", "name": "集集", "phone": "049-2762027", "address": "[55241]南投縣集集鎮吳厝里育才街147號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "集集鎮", "name": "隘寮", "phone": "049-2781154", "address": "[55243]南投縣集集鎮田寮里田寮巷4號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "集集鎮", "name": "永昌", "phone": "049-2762524", "address": "[55242]南投縣集集鎮永昌里東昌巷4號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "集集鎮", "name": "和平", "phone": "049-2762036", "address": "[55241]南投縣集集鎮和平里集集街178號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "名間", "phone": "049-2732024", "address": "[55146]南投縣名間鄉中山村彰南路220號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "新街", "phone": "049-2223534", "address": "[55147]南投縣名間鄉新街村彰南路375號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "名崗", "phone": "049-2271864", "address": "[55151]南投縣名間鄉大坑村南田路222號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "中山", "phone": "049-2582335", "address": "[55153]南投縣名間鄉名松路一段294號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "弓鞋", "phone": "049-2581322", "address": "[551]南投縣名間鄉名松路二段580號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "田豐", "phone": "049-2271509", "address": "[55147]南投縣名間鄉田仔村田仔巷40號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "僑興", "phone": "049-2732340", "address": "[55147]南投縣名間鄉東湖村彰南路259號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "名間鄉", "name": "新民", "phone": "049-2732514", "address": "[55143]南投縣名間鄉新民村新民巷43號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "鹿谷", "phone": "049-2752048", "address": "[55843]南投縣鹿谷鄉鹿谷村中正路2段174號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "秀峰", "phone": "049-2671953", "address": "[55855]南投縣鹿谷鄉秀峰村仁愛路152號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "文昌", "phone": "049-2676305", "address": "[55851]南投縣鹿谷鄉竹林村光復路96號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "鳳凰", "phone": "049-2752214", "address": "[55841]南投縣鹿谷鄉鳳凰村仁義路35之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "內湖", "phone": "049-2752437", "address": "[55842]南投縣鹿谷鄉內湖村興產路51號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "初鄉", "phone": "049-2752513", "address": "[55844]南投縣鹿谷鄉初鄉村仁愛路259號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "瑞田", "phone": "049-2671284", "address": "[55861]南投縣鹿谷鄉瑞田村仁愛路80號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "鹿谷鄉", "name": "廣興", "phone": "049-2752014", "address": "[55842]南投縣鹿谷鄉廣興村興產路97號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "中寮", "phone": "049-2691322", "address": "[54155]南投縣中寮鄉永平村永平路316號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "爽文", "phone": "049-2601003", "address": "[54153]南投縣中寮鄉爽文村龍南路159號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "永樂", "phone": "049-2691473", "address": "[54155]南投縣中寮鄉福盛村永樂路88號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "永康", "phone": "049-2691455", "address": "[54154]南投縣中寮鄉永福村仙峰巷44號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "清水", "phone": "049-2601079", "address": "[54153]南投縣中寮鄉清水村瀧林巷3號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "至誠", "phone": "049-2227215", "address": "[54151]南投縣中寮鄉永平路489之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "永和", "phone": "049-2601068", "address": "[54153]南投縣中寮鄉龍南路321之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "中寮鄉", "name": "廣福", "phone": "049-2691464", "address": "[54154]南投縣中寮鄉廣福村內城巷3之2號", "defaultDeliveryLocation": "教務處", "salesman": "黃依華"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "魚池", "phone": "049-2895537", "address": "[55542]南投縣魚池鄉魚池村瓊文巷41號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "頭社", "phone": "049-2861237", "address": "[55546]南投縣魚池鄉頭社村平和巷105號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "東光", "phone": "049-2880584", "address": "[55545]南投縣魚池鄉東光村慶隆巷36號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "五城", "phone": "049-2896455", "address": "[55543]南投縣魚池鄉五城村華龍巷1之2號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "明潭", "phone": "049-2855045", "address": "[55548]南投縣魚池鄉水社村中山路190號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "新城", "phone": "049-2895724", "address": "[55542]南投縣魚池鄉新城村通文巷7之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "伊達", "phone": "049-2850441", "address": "[55546]南投縣魚池鄉日月村中正路211巷1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "魚池鄉", "name": "共和", "phone": "049-2880608", "address": "[55545]南投縣魚池鄉共和村五馬巷57之1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "國姓", "phone": "049-2721018", "address": "[54443]南投縣國姓鄉石門村國姓路311號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "北山", "phone": "049-2451935", "address": "[54448]南投縣國姓鄉中正路4段119-1號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "北港", "phone": "049-2461345", "address": "[54446]南投縣國姓鄉北港村國姓路63號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "福龜", "phone": "049-2721019", "address": "[54447]南投縣國姓鄉福龜村長壽巷83號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "長流", "phone": "049-2431006", "address": "[54445]南投縣國姓鄉長流村大長路559號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "南港", "phone": "049-2451937", "address": "[54448]南投縣國姓鄉南港村南港路112-8號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "育樂", "phone": "049-2721274", "address": "[54444]南投縣國姓鄉柑林村中正路2段223號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "港源", "phone": "049-2451933", "address": "[54448]南投縣國姓鄉南港村港頭巷60號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "長福", "phone": "049-2431295", "address": "[54445]南投縣國姓鄉長福村大長路71號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "國姓鄉", "name": "乾峰", "phone": "049-2721385", "address": "[54447]南投縣國姓鄉乾溝村中西巷3號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "水里", "phone": "049-2770014", "address": "[55342]南投縣水里鄉南光村民族路151號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "郡坑", "phone": "049-2821421", "address": "[55347]南投縣水里鄉上安村水信路三段303巷8號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "民和", "phone": "049-2741140", "address": "[55382]南投縣水里鄉民和村文明路70號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "新興", "phone": "049-2811187", "address": "[55345]南投縣水里鄉新興村新興巷15號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "玉峰", "phone": "049-2772274", "address": "[55381]南投縣水里鄉玉峰村仁愛路3號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "永興", "phone": "049-2772545", "address": "[55346]南投縣水里鄉永興村林朋巷148號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "水里鄉", "name": "成城", "phone": "049-2770140", "address": "[55344]南投縣水里鄉新城村中山路二段150號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "信義", "phone": "049-2791263", "address": "[55646]南投縣信義鄉明德村玉山路24號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "羅娜", "phone": "049-2831327", "address": "[55650]南投縣信義鄉羅娜村信筆巷1鄰73號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "同富", "phone": "049-2701503", "address": "[55652]南投縣信義鄉同富村同和巷4號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "愛國", "phone": "049-2791616", "address": "[55642]南投縣信義鄉愛國村愛國巷108號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "人和", "phone": "049-2773259", "address": "[55681]南投縣信義鄉人和村民生巷3號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "地利", "phone": "049-2741254", "address": "[55682]南投縣信義鄉地利村開信巷17號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "東埔", "phone": "049-2701340", "address": "[55691]南投縣信義鄉東埔村開高巷63號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "潭南", "phone": "049-2741381", "address": "[55682]南投縣信義鄉潭南村和平巷49號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "桐林", "phone": "049-2701483", "address": "[55653]南投縣信義鄉同富村太平巷18號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "隆華", "phone": "049-2701478", "address": "[55654]南投縣信義鄉神木村民和巷65-6號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "新鄉", "phone": "049-2831591", "address": "[55648]南投縣信義鄉新鄉村新鄉路80號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "久美", "phone": "049-2831506", "address": "[55651]南投縣信義鄉望美村美信巷54號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "雙龍", "phone": "049-2741325", "address": "[55682]南投縣信義鄉雙龍村光復巷4號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "信義鄉", "name": "豐丘", "phone": "049-2791723", "address": "[55647]南投縣信義鄉豐丘村高平巷77號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "仁愛", "phone": "049-2802373", "address": "[54641]南投縣仁愛鄉大同村山農巷5號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "親愛", "phone": "049-2974033", "address": "[54652]南投縣仁愛鄉親愛村高平路3號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "法治", "phone": "049-2977061", "address": "[54669]南投縣仁愛鄉法治村界山巷6號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "合作", "phone": "049-2970063", "address": "[54663]南投縣仁愛鄉合作村平生路23號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "互助", "phone": "049-2941016", "address": "[54671]南投縣仁愛鄉互助村中華路19號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "力行", "phone": "049-2955078", "address": "[54664]南投縣仁愛鄉力行村新望洋67號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "南豐", "phone": "049-2920037", "address": "[54661]南投縣仁愛鄉南豐村楓林路3號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "中正", "phone": "049-2925114", "address": "[54668]南投縣仁愛鄉中正村平等巷114號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "廬山", "phone": "049-2970385", "address": "[54663]南投縣仁愛鄉精英村中華巷19號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "發祥", "phone": "049-2955030", "address": "[54667]南投縣仁愛鄉發祥村光復巷24號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "萬豐", "phone": "049-2974123", "address": "[54662]南投縣仁愛鄉萬豐村清華巷8號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "都達", "phone": "049-2970053", "address": "[54663]南投縣仁愛鄉都達村法觀路17號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "春陽", "phone": "049-2802573", "address": "[54663]南投縣仁愛鄉春陽村永樂巷58號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "紅葉", "phone": "049-2955075", "address": "[54666]南投縣仁愛鄉發祥村仁盛路70號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}, {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "清境", "phone": "049-2802572", "address": "[54641]南投縣仁愛鄉定遠新村24號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}];
+
+    let targetAcademicYear = 115;
+    let targetSemester = '2'; // '2': 下學期(雙數冊), '1': 上學期(單數冊)
+    let autoCalculatedYear = 115;
+
+    let currentOrderType = 'initial';
+    let currentSchoolKey = '';
+
+    const ORDER_RULE = {
+      '2': {
+        name: '第二學期',
+        titleSuffix: '第二學期',
+        lowGrades: { g1: 2, g2: 4 },
+        midHighGrades: { g3: 2, g4: 4, g5: 6, g6: 8 },
+        hintLow: '預訂下學期：一年級第2冊、二年級第4冊 (雙數冊)',
+        hintMid: '預訂下學期為雙數冊：2、4、6、8 冊',
+        deliveryWeeks: ['1/11 - 1/15', '1/18 - 1/22', '1/25 - 1/29', '2/1 - 2/5', '開學前一週送達']
+      },
+      '1': {
+        name: '第一學期',
+        titleSuffix: '第一學期',
+        lowGrades: { g1: 1, g2: 3 },
+        midHighGrades: { g3: 1, g4: 3, g5: 5, g6: 7 },
+        hintLow: '預訂上學期：一年級第1冊、二年級第3冊 (單數冊)',
+        hintMid: '預訂上學期為單數冊：1、3、5、7 冊',
+        deliveryWeeks: ['7/13 - 7/17', '7/20 - 7/24', '7/27 - 7/31', '8/3 - 8/7', '8/10 - 8/14']
+      }
+    };
+
+    function changeOrderType(type) {
+      currentOrderType = type;
+
+      const btnInit = document.getElementById('btnOrderTypeInitial');
+      const btnMod = document.getElementById('btnOrderTypeModify');
+      const btnApp = document.getElementById('btnOrderTypeAppend');
+
+      const badge = document.getElementById('badgeOrderType');
+      const titleTag = document.getElementById('labelOrderTypeTitle');
+      const desc = document.getElementById('orderTypeDesc');
+      const remarkInput = document.getElementById('orderRemark');
+      const bannerNotice = document.getElementById('bannerOrderNotice');
+      const bannerNoticeText = document.getElementById('bannerOrderNoticeText');
+
+      btnInit.className = "px-2.5 py-0.5 text-xs font-medium border border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200";
+      btnMod.className = "px-2.5 py-0.5 text-xs font-medium border border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200";
+      btnApp.className = "px-2.5 py-0.5 text-xs font-medium border border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200";
+
+      if (type === 'initial') {
+        btnInit.className = "px-2.5 py-0.5 text-xs font-bold rounded-l-md border border-slate-700 bg-slate-800 text-white shadow-sm";
+        badge.textContent = "首筆訂購單";
+        badge.className = "type-badge-stamp bg-slate-800 text-white text-[10px]";
+        titleTag.textContent = "(B版)";
+        titleTag.className = "text-red-700 text-lg font-bold";
+        desc.textContent = "(全校常規首筆訂單)";
+        bannerNotice.classList.add('hidden');
+        if (!remarkInput.value || remarkInput.value.includes('改單') || remarkInput.value.includes('增訂')) {
+          remarkInput.value = "全校常規訂購";
+        }
+      } else if (type === 'modify') {
+        btnMod.className = "px-2.5 py-0.5 text-xs font-bold border border-red-600 bg-red-600 text-white shadow-sm";
+        badge.textContent = "★ 改單 (數量變更)";
+        badge.className = "type-badge-stamp bg-red-700 text-white text-[10px] animate-pulse";
+        titleTag.textContent = "【改單】";
+        titleTag.className = "text-red-700 text-lg font-black";
+        desc.textContent = "(覆蓋/變更前單，請依此單出書)";
+        
+        bannerNotice.className = "mb-1.5 p-1 rounded text-[11px] flex items-center justify-between border bg-red-50 border-red-300 text-red-900";
+        bannerNoticeText.innerHTML = "⚠️ <strong>【改單通知】</strong> 本單為訂單變更單，經銷商出貨請以此單數量為準，並作廢前次單據！";
+        bannerNotice.classList.remove('hidden');
+        
+        if (!remarkInput.value || remarkInput.value.includes('常規')) {
+          remarkInput.value = "更正數量，以此單為準";
+        }
+      } else if (type === 'append') {
+        btnApp.className = "px-2.5 py-0.5 text-xs font-bold rounded-r-md border border-emerald-600 bg-emerald-600 text-white shadow-sm";
+        badge.textContent = "★ 增訂 (追加補單)";
+        badge.className = "type-badge-stamp bg-emerald-700 text-white text-[10px]";
+        titleTag.textContent = "【增訂單】";
+        titleTag.className = "text-emerald-700 text-lg font-black";
+        desc.textContent = "(僅追加本次數量，勿重複送首單)";
+        
+        bannerNotice.className = "mb-1.5 p-1 rounded text-[11px] flex items-center justify-between border bg-emerald-50 border-emerald-300 text-emerald-900";
+        bannerNoticeText.innerHTML = "📦 <strong>【追加增訂通知】</strong> 本單為追加增訂單，僅配送本單所列數量，請勿重複出首筆訂單！";
+        bannerNotice.classList.remove('hidden');
+
+        if (!remarkInput.value || remarkInput.value.includes('常規') || remarkInput.value.includes('改單')) {
+          remarkInput.value = "追加增訂，僅配送本單數量";
+        }
+      }
+    }
+
+    function createNewOrderForSchool() {
+      const schoolName = document.getElementById('schoolName').value.trim();
+      if (!schoolName) {
+        alert('請先搜尋並選擇一間學校！');
+        return;
+      }
+
+      document.querySelectorAll('.calc-input').forEach(inp => inp.value = '');
+      calculateSummary();
+      changeOrderType('append');
+      document.getElementById('orderRemark').value = `追加補訂 (第二筆單據)`;
+
+      alert(`已為【${schoolName}國小】開啟第 2 筆訂購單！\n已自動切換為【增訂單】模式。\n若此筆是要修改先前數量，可於上方切換為【改單】！`);
+    }
+
+    function autoDetectSchoolTerm() {
+      const now = new Date();
+      const rocYear = now.getFullYear() - 1911;
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+
+      document.getElementById('orderYear').value = rocYear;
+      document.getElementById('orderMonth').value = String(month).padStart(2, '0');
+      document.getElementById('orderDay').value = String(date).padStart(2, '0');
+
+      let currentAcadYear = 115;
+      let targetAcadYear = 115;
+      let targetSem = '2';
+
+      if (month >= 8 || month === 1) {
+        currentAcadYear = (month >= 8) ? rocYear : (rocYear - 1);
+        targetAcadYear = currentAcadYear;
+        targetSem = '2';
+      } else {
+        currentAcadYear = rocYear - 1;
+        targetAcadYear = currentAcadYear + 1;
+        targetSem = '1';
+      }
+
+      autoCalculatedYear = targetAcadYear;
+      targetAcademicYear = targetAcadYear;
+      targetSemester = targetSem;
+
+      renderOrderForm(targetAcadYear, targetSem);
+    }
+
+    function setManualOrderTarget(sem) {
+      targetSemester = sem;
+      renderOrderForm(targetAcademicYear, sem);
+      const badge = document.getElementById('autoDetectBadge');
+      badge.textContent = "✏️ 手動指定學期";
+      badge.className = "text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1 py-0.5 rounded font-mono";
+    }
+
+    function renderOrderForm(year, sem) {
+      targetAcademicYear = year;
+      targetSemester = sem;
+      const conf = ORDER_RULE[sem];
+
+      const btnSem2 = document.getElementById('btnTargetSem2');
+      const btnSem1 = document.getElementById('btnTargetSem1');
+      if (sem === '2') {
+        btnSem2.className = "px-2 py-0.5 rounded-md font-bold transition bg-white text-red-700 shadow-sm";
+        btnSem1.className = "px-2 py-0.5 rounded-md font-medium transition text-slate-600 hover:text-slate-900";
+      } else {
+        btnSem1.className = "px-2 py-0.5 rounded-md font-bold transition bg-white text-red-700 shadow-sm";
+        btnSem2.className = "px-2 py-0.5 rounded-md font-medium transition text-slate-600 hover:text-slate-900";
+      }
+
+      document.getElementById('labelTargetYear').textContent = targetAcademicYear;
+      document.getElementById('labelTargetSemester').textContent = conf.titleSuffix;
+      document.getElementById('hintLowSemester').textContent = conf.hintLow;
+      document.getElementById('hintMidSemester').textContent = conf.hintMid;
+
+      // 【★ B版更新】加入 wosp (WOW! STORY Phonics)
+      ['wosp', 'wow', 'fw', 'gm'].forEach(series => {
+        const el1 = document.getElementById(`vol_g1_${series}`);
+        const el2 = document.getElementById(`vol_g2_${series}`);
+        if (el1) el1.textContent = conf.lowGrades.g1;
+        if (el2) el2.textContent = conf.lowGrades.g2;
+      });
+
+      document.getElementById('vol_g3_sf').textContent = conf.midHighGrades.g3;
+      document.getElementById('vol_g4_sf').textContent = conf.midHighGrades.g4;
+      document.getElementById('vol_g5_sf').textContent = conf.midHighGrades.g5;
+      document.getElementById('vol_g6_sf').textContent = conf.midHighGrades.g6;
+
+      const weekContainer = document.getElementById('deliveryWeekContainer');
+      weekContainer.innerHTML = conf.deliveryWeeks.map((week, idx) => `
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" name="deliveryDate" value="${week}" ${idx === 1 ? 'checked' : ''} class="accent-red-600 rounded">
+          <span>${week}</span>
+        </label>
+      `).join('');
+
+      calculateSummary();
+    }
+
+    let currentQRCode = null;
+    function updateQRCode(orderUrl) {
+      const qrcodeBox = document.getElementById('qrcodeBox');
+      qrcodeBox.innerHTML = '';
+      currentQRCode = new QRCode(qrcodeBox, {
+        text: orderUrl,
+        width: 48,
+        height: 48,
+        colorDark: "#1e293b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function handleSchoolSearch(keyword) {
+      const dropdown = document.getElementById('schoolDropdown');
+      if (!keyword || keyword.trim() === '') {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      const q = keyword.trim().toLowerCase();
+      const matches = SCHOOL_DATABASE.filter(s => 
+        s.name.toLowerCase().includes(q) || 
+        s.city.toLowerCase().includes(q) || 
+        s.district.toLowerCase().includes(q) ||
+        (s.salesman && s.salesman.toLowerCase().includes(q))
+      );
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = '<div class="p-2 text-slate-400 text-center">查無相符學校，可直接手動輸入</div>';
+        dropdown.classList.remove('hidden');
+        return;
+      }
+
+      dropdown.innerHTML = matches.slice(0, 15).map((s, idx) => `
+        <div onclick="selectSchoolByName('${s.name}')" class="p-2 hover:bg-red-50 hover:text-red-700 cursor-pointer flex justify-between items-center transition">
+          <div>
+            <span class="font-bold text-slate-800">${s.name}國小</span>
+            <span class="text-[10px] text-slate-500 ml-1">(${s.fullCity} / ${s.district})</span>
+          </div>
+          <div class="text-[10px] text-right">
+            <span class="text-slate-400 block">${s.salesman ? '業務: ' + s.salesman : ''}</span>
+          </div>
+        </div>
+      `).join('');
+      dropdown.classList.remove('hidden');
+    }
+
+    function selectSchoolByName(name) {
+      const s = SCHOOL_DATABASE.find(item => item.name === name);
+      if (!s) return;
+
+      currentSchoolKey = `${s.city}_${s.district}_${s.name}`;
+      document.getElementById('schoolCity').value = s.city;
+      document.getElementById('schoolDistrict').value = s.district;
+      document.getElementById('schoolName').value = s.name;
+      document.getElementById('contactPhone').value = s.phone;
+      document.getElementById('schoolAddress').value = s.address;
+      document.getElementById('deliveryLocation').value = s.defaultDeliveryLocation || '教務處';
+
+      const salesmanEl = document.getElementById('salesmanInfo');
+      if (s.salesman) {
+        salesmanEl.textContent = `服務業務：${s.salesman}`;
+        salesmanEl.classList.remove('hidden');
+      } else {
+        salesmanEl.classList.add('hidden');
+      }
+
+      document.getElementById('schoolDropdown').classList.add('hidden');
+      document.getElementById('schoolSearchInput').value = `${s.name}國小`;
+
+      updateSchoolOrdersDropdown();
+    }
+
+    function updateSchoolOrdersDropdown() {
+      const select = document.getElementById('schoolOrderHistorySelect');
+      select.innerHTML = '<option value="current">-- 填寫中新單據 --</option>';
+
+      const stored = localStorage.getItem(`orders_${currentSchoolKey}`);
+      if (stored) {
+        const orders = JSON.parse(stored);
+        orders.forEach((ord, i) => {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = `第${i + 1}筆 [${ord.orderTypeLabel}] ${ord.orderId}`;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    function loadSavedOrder(idx) {
+      if (idx === 'current') return;
+      const stored = localStorage.getItem(`orders_${currentSchoolKey}`);
+      if (!stored) return;
+      const orders = JSON.parse(stored);
+      const ord = orders[parseInt(idx)];
+      if (!ord) return;
+
+      document.querySelectorAll('.calc-input').forEach(inp => {
+        const base = inp.dataset.base;
+        const kind = inp.dataset.kind;
+        const key = Object.keys(ord.items || {}).find(k => k.startsWith(base) && k.endsWith(kind));
+        inp.value = key ? ord.items[key] : '';
+      });
+
+      changeOrderType(ord.orderType);
+      document.getElementById('orderRemark').value = ord.orderRemark || '';
+      document.getElementById('contactPerson').value = ord.contactPerson || '';
+      document.getElementById('contactPhone').value = ord.contactPhone || '';
+      document.getElementById('badgeOrderNo').textContent = `單號: ${ord.orderId}`;
+      document.getElementById('badgeOrderNo').classList.remove('hidden');
+      document.getElementById('qrOrderLabel').textContent = ord.orderId;
+      calculateSummary();
+    }
+
+    document.addEventListener('click', (e) => {
+      const searchBox = document.getElementById('schoolSearchInput');
+      const dropdown = document.getElementById('schoolDropdown');
+      if (!searchBox.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    function calculateSummary() {
+      let sumTextbook = 0, sumWorkbook = 0, sumCard = 0, sumTeacher = 0;
+
+      document.querySelectorAll('.q-textbook').forEach(inp => sumTextbook += (parseInt(inp.value) || 0));
+      document.querySelectorAll('.q-workbook').forEach(inp => sumWorkbook += (parseInt(inp.value) || 0));
+      document.querySelectorAll('.q-card').forEach(inp => sumCard += (parseInt(inp.value) || 0));
+      document.querySelectorAll('.q-teacher').forEach(inp => sumTeacher += (parseInt(inp.value) || 0));
+
+      document.getElementById('totalTextbook').textContent = sumTextbook > 0 ? (sumTextbook + ' 本') : '0 本';
+      document.getElementById('totalWorkbook').textContent = sumWorkbook > 0 ? (sumWorkbook + ' 本') : '0 本';
+      document.getElementById('totalCard').textContent = sumCard > 0 ? (sumCard + ' 張') : '0 張';
+      document.getElementById('totalTeacher').textContent = sumTeacher > 0 ? (sumTeacher + ' 份') : '0 份';
+    }
+
+    function clearFormData() {
+      if (!confirm('確定要清空目前填寫的數量與資料嗎？')) return;
+      document.querySelectorAll('.calc-input').forEach(inp => inp.value = '');
+      document.getElementById('schoolCity').value = '';
+      document.getElementById('schoolDistrict').value = '';
+      document.getElementById('schoolName').value = '';
+      document.getElementById('contactPerson').value = '';
+      document.getElementById('contactPhone').value = '';
+      document.getElementById('schoolAddress').value = '';
+      document.getElementById('deliveryLocation').value = '教務處';
+      document.getElementById('orderRemark').value = '';
+      document.getElementById('schoolSearchInput').value = '';
+      changeOrderType('initial');
+      calculateSummary();
+    }
+
+    function getFormData() {
+      const selectedDates = [];
+      document.querySelectorAll('input[name="deliveryDate"]:checked').forEach(c => selectedDates.push(c.value));
+      const conf = ORDER_RULE[targetSemester];
+
+      const items = {};
+      document.querySelectorAll('.calc-input').forEach(inp => {
+        const val = parseInt(inp.value) || 0;
+        const base = inp.dataset.base;
+        const kind = inp.dataset.kind;
+        if (base && kind && val > 0) {
+          let vol = 1;
+          if (base.includes('G1')) vol = conf.lowGrades.g1;
+          else if (base.includes('G2')) vol = conf.lowGrades.g2;
+          else if (base.includes('G3')) vol = conf.midHighGrades.g3;
+          else if (base.includes('G4')) vol = conf.midHighGrades.g4;
+          else if (base.includes('G5')) vol = conf.midHighGrades.g5;
+          else if (base.includes('G6')) vol = conf.midHighGrades.g6;
+
+          const key = `${base}-B${vol}-${kind}`;
+          items[key] = val;
+        }
+      });
+
+      const orderTypeLabels = {
+        'initial': '首筆訂單',
+        'modify': '改單(變更)',
+        'append': '增訂(追加)'
+      };
+
+      return {
+        academicYear: targetAcademicYear,
+        semester: targetSemester,
+        semesterText: conf.name,
+        targetBookType: targetSemester === '2' ? '雙數冊' : '單數冊',
+        orderType: currentOrderType,
+        orderTypeLabel: orderTypeLabels[currentOrderType],
+        schoolCity: document.getElementById('schoolCity').value.trim(),
+        schoolDistrict: document.getElementById('schoolDistrict').value.trim(),
+        schoolName: document.getElementById('schoolName').value.trim(),
+        contactPerson: document.getElementById('contactPerson').value.trim(),
+        contactPhone: document.getElementById('contactPhone').value.trim(),
+        schoolAddress: document.getElementById('schoolAddress').value.trim(),
+        deliveryLocation: document.getElementById('deliveryLocation').value.trim(),
+        orderRemark: document.getElementById('orderRemark').value.trim(),
+        deliveryDates: selectedDates.join(', '),
+        orderDate: `${document.getElementById('orderYear').value}/${document.getElementById('orderMonth').value}/${document.getElementById('orderDay').value}`,
+        totalTextbook: document.getElementById('totalTextbook').textContent,
+        totalWorkbook: document.getElementById('totalWorkbook').textContent,
+        totalCard: document.getElementById('totalCard').textContent,
+        totalTeacher: document.getElementById('totalTeacher').textContent,
+        items: items
+      };
+    }
+
+    // Google Apps Script 部署 URL
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxxaAijgb1ksimLYtYjQr9PoK-Fzlk_M7d1ucw_qzflPs-R23X_RkqCLTQ2mkH-gr_d/exec";
+
+    async function submitOrder() {
+      const data = getFormData();
+      if (!data.schoolName) {
+        alert('請先搜尋並選擇學校名稱！');
+        return;
+      }
+      if (!data.contactPerson) {
+        alert('請填寫承辦人員姓名！');
+        return;
+      }
+
+      const randomSuffix = Math.floor(100 + Math.random() * 900);
+      let typeSuffix = "";
+      if (data.orderType === 'modify') typeSuffix = "-改1";
+      else if (data.orderType === 'append') typeSuffix = "-增1";
+
+      const orderId = `HJ-${data.academicYear}${data.semester}-${data.schoolName}-${randomSuffix}${typeSuffix}`;
+      data.orderId = orderId;
+
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerHTML = `送出中...`;
+
+      const orderLookupUrl = `${GAS_WEBAPP_URL}?orderId=${encodeURIComponent(orderId)}`;
+
+      try {
+        if (GAS_WEBAPP_URL && !GAS_WEBAPP_URL.includes("YOUR_GAS_ID")) {
+          await fetch(GAS_WEBAPP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data)
+          });
+        }
+
+        const key = `orders_${data.schoolCity}_${data.schoolDistrict}_${data.schoolName}`;
+        let existing = [];
+        try {
+          const exStr = localStorage.getItem(key);
+          if (exStr) existing = JSON.parse(exStr);
+        } catch(e) {}
+        existing.push(data);
+        localStorage.setItem(key, JSON.stringify(existing));
+        updateSchoolOrdersDropdown();
+
+        updateQRCode(orderLookupUrl);
+        const badge = document.getElementById('badgeOrderNo');
+        badge.textContent = `單號: ${orderId} (${data.orderTypeLabel})`;
+        badge.classList.remove('hidden');
+        document.getElementById('qrOrderLabel').textContent = orderId;
+        document.getElementById('qrOrderTypeHint').textContent = data.orderTypeLabel;
+
+        alert(`✅ B版訂單送出成功！\n單號：${orderId}\n類別：【${data.orderTypeLabel}】\n學校：${data.schoolName}國小\n資料已同步傳送至雲端試算表並產出專屬 QR Code！請點擊「列印核章單」列印呈核！`);
+      } catch (err) {
+        console.error(err);
+        alert('送出時發生問題，請檢查網路連線或直接列印紙本！');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 線上送出`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      autoDetectSchoolTerm();
+      changeOrderType('initial');
+      updateQRCode(window.location.href);
+    });
+  </script>
+</body>
+</html>
