@@ -201,6 +201,9 @@
         <button onclick="clearFormData()" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-300">
           🔄 清空
         </button>
+        <button onclick="openHelpModal()" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-bold transition border border-amber-300 shadow-sm flex items-center gap-1">
+          📖 使用說明
+        </button>
         <button onclick="submitOrder()" id="btnSubmit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           線上送出
@@ -313,15 +316,20 @@
             <span>日</span>
           </div>
 
-          <!-- 第二列：承辦人員 與 聯絡電話 -->
-          <div class="col-span-6 flex items-center">
+          <!-- 第二列：承辦人員、聯絡電話 與 電子信箱 -->
+          <div class="col-span-4 flex items-center">
             <span class="font-bold text-slate-800 whitespace-nowrap">承辦人員：</span>
             <input type="text" id="contactPerson" placeholder="請輸入老師姓名/職稱" class="border-b border-slate-400 flex-1 px-1 outline-none font-semibold text-slate-900">
           </div>
 
-          <div class="col-span-6 flex items-center">
+          <div class="col-span-4 flex items-center">
             <span class="font-bold text-slate-800 whitespace-nowrap">聯絡電話：</span>
             <input type="text" id="contactPhone" placeholder="市話分機或手機" class="border-b border-slate-400 flex-1 px-1 outline-none font-mono-num">
+          </div>
+
+          <div class="col-span-4 flex items-center">
+            <span class="font-bold text-slate-800 whitespace-nowrap">電子信箱：</span>
+            <input type="email" id="contactEmail" placeholder="公務或個人 Email" class="border-b border-slate-400 flex-1 px-1 outline-none font-mono-num text-slate-900">
           </div>
 
           <!-- 第三列：學校地址 (自動帶入) -->
@@ -1036,6 +1044,7 @@
       document.getElementById('orderRemark').value = ord.orderRemark || '';
       document.getElementById('contactPerson').value = ord.contactPerson || '';
       document.getElementById('contactPhone').value = ord.contactPhone || '';
+      document.getElementById('contactEmail').value = ord.contactEmail || '';
       document.getElementById('badgeOrderNo').textContent = `單號: ${ord.orderId}`;
       document.getElementById('badgeOrderNo').classList.remove('hidden');
       document.getElementById('qrOrderLabel').textContent = ord.orderId;
@@ -1072,6 +1081,7 @@
       document.getElementById('schoolName').value = '';
       document.getElementById('contactPerson').value = '';
       document.getElementById('contactPhone').value = '';
+      document.getElementById('contactEmail').value = '';
       document.getElementById('schoolAddress').value = '';
       document.getElementById('deliveryLocation').value = '教務處';
       document.getElementById('orderRemark').value = '';
@@ -1122,6 +1132,7 @@
         schoolName: document.getElementById('schoolName').value.trim(),
         contactPerson: document.getElementById('contactPerson').value.trim(),
         contactPhone: document.getElementById('contactPhone').value.trim(),
+        contactEmail: document.getElementById('contactEmail').value.trim(),
         schoolAddress: document.getElementById('schoolAddress').value.trim(),
         deliveryLocation: document.getElementById('deliveryLocation').value.trim(),
         orderRemark: document.getElementById('orderRemark').value.trim(),
@@ -1206,5 +1217,197 @@
       updateQRCode(window.location.href);
     });
   </script>
+
+  <!-- 使用說明彈窗 Modal (列印時自動隱藏 no-print) -->
+  <div id="helpModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 no-print" onclick="handleHelpModalBackdrop(event)">
+    <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150" onclick="event.stopPropagation()">
+      
+      <!-- 彈窗頂部 Header -->
+      <div class="px-5 py-3.5 bg-gradient-to-r from-red-800 to-red-900 text-white flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📖</span>
+          <div>
+            <h3 class="font-bold text-sm md:text-base leading-tight">何嘉仁國小英語教材訂購單 (B版) — 填報使用說明</h3>
+            <p class="text-[11px] text-red-200 mt-0.5">鍠嘉文化教育用品社 ｜ 服務電話：(04) 839-2577 ｜ 傳真：(04) 828-5424</p>
+          </div>
+        </div>
+        <button onclick="closeHelpModal()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg text-xs font-bold transition">
+          ✕ 關閉
+        </button>
+      </div>
+
+      <!-- 彈窗內容區 (滾動) -->
+      <div class="p-4 md:p-6 overflow-y-auto space-y-4 text-slate-700 text-xs md:text-sm leading-relaxed">
+        
+        <!-- 核心亮點 4 大卡片 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+          <div class="bg-red-50/70 border border-red-100 p-2.5 rounded-xl">
+            <div class="font-bold text-red-900 flex items-center gap-1 mb-1">🔍 313 校名冊</div>
+            <p class="text-[11px] text-slate-600">鍵入校名簡稱（如：中山、南光、弓鞋）即秒速帶入地址電話。</p>
+          </div>
+          <div class="bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl">
+            <div class="font-bold text-amber-900 flex items-center gap-1 mb-1">🤖 智慧推算冊次</div>
+            <p class="text-[11px] text-slate-600">依日期自動切換上/下學期冊別與送書週次，徹底防呆防錯。</p>
+          </div>
+          <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl">
+            <div class="font-bold text-blue-900 flex items-center gap-1 mb-1">📑 改單與增訂</div>
+            <p class="text-[11px] text-slate-600">支援首單、編班微調作廢改單、轉學生補單，一校多單分明。</p>
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-100 p-2.5 rounded-xl">
+            <div class="font-bold text-emerald-900 flex items-center gap-1 mb-1">🖨️ A4 嚴格單頁</div>
+            <p class="text-[11px] text-slate-600">列印時保證鎖定單張 A4 絕不跨頁，附線上查驗 QR 碼。</p>
+          </div>
+        </div>
+
+        <!-- 6 步驟流程引導 -->
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60 space-y-3">
+          <h4 class="font-bold text-slate-900 text-xs md:text-sm flex items-center gap-1.5 border-b border-slate-200 pb-2">
+            <span class="w-1.5 h-3.5 bg-red-700 rounded-sm"></span> 填報作業 6 大步驟詳解
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">1</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">快速檢索學校</strong>
+                在頂部搜尋框輸入學校簡稱（如：中山、南光、平和），點擊選單自動補齊地址、分機與預設指送處室。
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">2</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">確認學年期與冊別</strong>
+                確認「預訂下學期 (雙數冊)」或「預訂上學期 (單數冊)」，表格內的冊別欄位與送書週次會同步自動切換。
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">3</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">選擇單據類別</strong>
+                全校常規訂購選「首筆」；編班異動選「✏️ 改單（作廢前單）」；開學後轉學生補單選「➕ 增訂（追加）」。
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">4</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">填寫承辦資訊與週次</strong>
+                填寫老師姓名、聯絡電話與電子信箱，確認指送地點（如：教務處設備組），並勾選希望送達之送書週次（可複選）。
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">5</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">填寫教材冊數</strong>
+                填寫課本、習作、開通卡及任課教師用書人數，輸入時最下方「總量合計」將自動即時加總驗算。
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="w-5 h-5 rounded-full bg-red-700 text-white font-bold flex items-center justify-center shrink-0 text-[11px]">6</span>
+              <div>
+                <strong class="text-slate-900 block text-xs">線上送出與列印核章</strong>
+                點「線上送出」儲存至雲端並產生訂單流水號，再點「列印核章單」呈送長官簽核並傳真至 (04) 828-5424。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 單據類別說明表格 -->
+        <div class="border border-slate-200 rounded-xl p-3.5 bg-white space-y-2">
+          <h4 class="font-bold text-slate-900 text-xs md:text-sm flex items-center gap-1.5 border-b border-slate-100 pb-1.5">
+            <span class="w-1.5 h-3.5 bg-slate-800 rounded-sm"></span> 單據類別出貨與計費原則
+          </h4>
+          <table class="w-full text-[11px] border border-slate-200 text-left">
+            <thead class="bg-slate-50 text-slate-800 font-bold border-b border-slate-200">
+              <tr>
+                <th class="py-1 px-2 border-r border-slate-200 w-28">單據類別</th>
+                <th class="py-1 px-2 border-r border-slate-200">適用情境</th>
+                <th class="py-1 px-2">經銷商出貨與處理原則</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-600">
+              <tr>
+                <td class="py-1 px-2 font-bold text-slate-800 border-r border-slate-200">首筆訂購單</td>
+                <td class="py-1 px-2 border-r border-slate-200">學期初全校第一次正式常規訂購。</td>
+                <td class="py-1 px-2">以此單填報之數量為基準備書出貨。</td>
+              </tr>
+              <tr>
+                <td class="py-1 px-2 font-bold text-red-700 border-r border-slate-200">✏️ 改單 (數量變更)</td>
+                <td class="py-1 px-2 border-r border-slate-200">編班人數微調，需重新確認總數。</td>
+                <td class="py-1 px-2"><strong class="text-red-700">自動作廢前單</strong>，完全以本次改單數量為準出貨。</td>
+              </tr>
+              <tr>
+                <td class="py-1 px-2 font-bold text-emerald-700 border-r border-slate-200">➕ 增訂 (追加補單)</td>
+                <td class="py-1 px-2 border-r border-slate-200">開學後轉學生轉入或班級追加補本。</td>
+                <td class="py-1 px-2">視為獨立追加單，<strong class="text-emerald-700">僅配送本次追加填寫的數量</strong>。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 常見問題 FAQ -->
+        <div class="border border-slate-200 rounded-xl p-3.5 bg-white space-y-2">
+          <h4 class="font-bold text-slate-900 text-xs md:text-sm flex items-center gap-1.5 border-b border-slate-100 pb-1.5">
+            <span class="w-1.5 h-3.5 bg-blue-700 rounded-sm"></span> 常見問題與排除 (FAQ)
+          </h4>
+          <div class="space-y-1.5 text-xs text-slate-600">
+            <p><strong class="text-slate-800">Q1. 線上送出後發現冊數填錯怎麼辦？</strong><br>
+            A：請點選頂部「✏️ 改單 (數量變更)」，重新輸入正確數量並送出，系統將自動作廢舊單；或致電專線 (04) 839-2577 由業務專員為您調出修改。</p>
+            <p><strong class="text-slate-800">Q2. 列印時會不會跳頁或跑版？</strong><br>
+            A：系統採用嚴格單頁 A4 規格。列印時請確認邊界為「預設」或「無」，縮放比例為「100%」，即可完美鎖定單頁列印核章。</p>
+            <p><strong class="text-slate-800">Q3. 教師用書可以贈送多少份？</strong><br>
+            A：請依各年級實際任教該教材之任課教師人數覈實填寫，經銷商將如實按任教人數配送教學手冊。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 彈窗底部 Actions -->
+      <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="text-slate-500 font-medium">門市處：彰化縣員林市員大路一段250巷15號</span>
+        <button onclick="closeHelpModal()" class="px-4 py-1.5 bg-red-700 hover:bg-red-800 text-white rounded-lg font-bold transition shadow-sm">
+          我知道了，開始填寫
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ==================== 使用說明彈窗控制函式 ====================
+    function openHelpModal() {
+      const modal = document.getElementById('helpModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeHelpModal() {
+      const modal = document.getElementById('helpModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function handleHelpModalBackdrop(event) {
+      if (event.target === document.getElementById('helpModal')) {
+        closeHelpModal();
+      }
+    }
+
+    // 監聽鍵盤 ESC 鍵關閉彈窗
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeHelpModal();
+      }
+    });
+  </script>
+
 </body>
 </html>
