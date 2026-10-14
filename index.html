@@ -740,7 +740,7 @@
         midHighGrades: { g3: 2, g4: 4, g5: 6, g6: 8 },
         hintLow: '預訂下學期：一年級第2冊、二年級第4冊 (雙數冊)',
         hintMid: '預訂下學期為雙數冊：2、4、6、8 冊',
-        deliveryWeeks: ['1/11 - 1/15', '1/18 - 1/22', '1/25 - 1/29', '2/1 - 2/5', '開學前一週送達']
+        deliveryWeeks: ['12/21 - 12/24', '12/28 - 12/31', '1/4 - 1/8', '1/11 - 1/15', '1/18 - 1/22']
       },
       '1': {
         name: '第一學期',
@@ -905,10 +905,16 @@
       const weekContainer = document.getElementById('deliveryWeekContainer');
       weekContainer.innerHTML = conf.deliveryWeeks.map((week, idx) => `
         <label class="flex items-center gap-1 cursor-pointer">
-          <input type="checkbox" name="deliveryDate" value="${week}" ${idx === 1 ? 'checked' : ''} class="accent-red-600 rounded">
+          <input type="checkbox" name="deliveryDate" value="${week}" ${idx === 2 ? 'checked' : ''} class="accent-red-600 rounded">
           <span>${week}</span>
         </label>
-      `).join('');
+      `).join('') + `
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" id="customDeliveryCheck" class="accent-red-600 rounded">
+          <span>其他:</span>
+          <input type="text" id="customDeliveryText" placeholder="例: 1/25 - 1/29" oninput="document.getElementById('customDeliveryCheck').checked = !!this.value.trim()" class="w-24 border-b border-slate-400 text-center outline-none font-mono-num text-[10px]">
+        </label>
+      `;
 
       calculateSummary();
     }
@@ -1083,6 +1089,11 @@
     function getFormData() {
       const selectedDates = [];
       document.querySelectorAll('input[name="deliveryDate"]:checked').forEach(c => selectedDates.push(c.value));
+      const customCheck = document.getElementById('customDeliveryCheck');
+      const customText = document.getElementById('customDeliveryText');
+      if (customCheck && customCheck.checked && customText && customText.value.trim()) {
+        selectedDates.push(customText.value.trim());
+      }
       const conf = ORDER_RULE[targetSemester];
 
       const items = {};
