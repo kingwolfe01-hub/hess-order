@@ -1,0 +1,77 @@
+/* 嚴格 A4 直向規格控制 (210mm x 297mm) */
+@page {
+  size: A4 portrait;
+  margin: 4mm 8mm 4mm 8mm;
+}
+
+@media print {
+  /* 鎖定白色底色與列印字級 */
+  body {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+  }
+
+  /* 隱藏上方工具列與螢幕提示按鈕 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* A4 紙張本體去陰影、全寬滿版顯示，鎖定單頁不溢出 */
+  .a4-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 2mm 3mm !important;
+    font-size: 11px !important;
+  }
+
+  /* 輸入框在列印時隱藏框線與背景，呈現如實體紙本印刷填寫效果 */
+  input,
+  select,
+  textarea {
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* 移除數字輸入框的上下微調按鈕 */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* 列印模式下 QR Code 容器尺寸與居中適配 */
+  .qr-box-container {
+    width: 68px !important;
+    height: 68px !important;
+    padding: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* 解決空白方框：允許 Canvas 與 img 同步適應滿版，不切邊 */
+  .qr-box-container canvas,
+  .qr-box-container img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+
+  /* 確保印章色彩與文字精準列印出墨 */
+  img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
