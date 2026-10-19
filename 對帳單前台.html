@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鍠嘉文化教育用品社 - 115-2對帳單</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700;900&display=swap');
+
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .font-serif-tc { font-family: 'Noto Serif TC', serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+
+    /* 嚴格 A4 單頁直式列印規格 (210mm x 297mm) */
+    @page { size: A4 portrait; margin: 4mm; }
+
+    @media screen {
+      .a4-sheet { width: 96%; max-width: 980px; min-height: auto; margin: 15px auto; padding: 32px 36px !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); background: #ffffff; }
+      .toolbar-container { width: 96%; max-width: 980px; margin: 10px auto; }
+      .calc-row-input { font-size: 15px !important; }
+      .pay-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+      .pay-card:hover { transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+      .gov-field-line {
+        border-bottom: 1.5px solid #64748b;
+        background: transparent;
+        transition: border-color 0.2s;
+      }
+      .gov-field-line:focus {
+        border-bottom-color: #dc2626;
+      }
+    }
+
+    @media print {
+      body { background-color: #ffffff !important; padding: 0 !important; margin: 0 !important; }
+      .no-print { display: none !important; }
+      .a4-sheet { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; page-break-inside: avoid; }
+      input { border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
+      input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+      input::placeholder { color: transparent !important; }
+      #companyStampImg { filter: none !important; -webkit-filter: none !important; }
+    }
+
+    /* 搜尋結果 Modal 樣式 */
+    #searchModal { display: none; }
+    #searchModal.active { display: flex; }
+    .loader { border: 3px solid #f3f3f3; border-top: 3px solid #b91c1c; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="py-1 px-1 min-h-screen relative">
+
+  <!-- 頂部工具列 (列印時隱藏) -->
+  <div class="toolbar-container mx-auto mb-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 no-print">
+    
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
+        <h1 class="text-sm md:text-base font-bold text-slate-800">
+          教材對帳單系統 <span class="text-red-700 font-mono">(115學年度第二學期 雙數冊)</span>
+        </h1>
+        <span id="loadSourceBadge" class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded border font-mono">
+          待命模式 (請由下方搜尋或手動鍵入)
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="resetStatement()" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-300">
+          🔄 清空重置
+        </button>
+        <button onclick="window.print()" class="px-3.5 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold shadow transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4h10z"></path></svg>
+          列印對帳單
+        </button>
+        <button onclick="exportToFourForms()" class="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs md:text-sm font-bold shadow transition flex items-center gap-1.5">
+          📋 產製採購四表
+        </button>
+        <!-- ⭐ 核心新增：線上回傳按鈕 -->
+        <button id="btnSubmitReconcile" onclick="submitReconciliationToCloud()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs md:text-sm font-black shadow-md hover:shadow-lg transition flex items-center gap-1.5">
+          <span id="submitIcon">📤</span>
+          <span>線上回傳對帳結果</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 雲端查詢工具條 -->
+    <div class="pt-2 border-t border-slate-200 flex flex-col md:flex-row gap-3 text-sm bg-slate-50 p-2 rounded-lg items-center">
+      <div class="w-full flex items-center gap-2 bg-blue-50/80 p-2 rounded border border-blue-200">
+        <span class="font-bold text-blue-800 whitespace-nowrap pl-1">☁️ 雲端查詢:</span>
+        <input type="text" id="inputSearchKeyword" name="searchKeyword" placeholder="請輸入學校關鍵字 (範例：大竹、青山) 或 完整訂單編號" class="flex-1 border border-slate-300 rounded px-3 py-1.5 text-xs md:text-sm bg-white outline-none focus:border-blue-400 transition" onkeypress="if(event.key==='Enter') searchFromGasCloud()">
+        <input type="text" id="inputSearchDate" name="searchDate" placeholder="日期 (如:2026/04)" class="w-32 border border-slate-300 rounded px-2 py-1.5 text-xs md:text-sm bg-white outline-none focus:border-blue-400 transition" onkeypress="if(event.key==='Enter') searchFromGasCloud()">
+        <button id="btnSearch" onclick="searchFromGasCloud()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs md:text-sm font-bold whitespace-nowrap transition flex items-center shadow-sm">
+          <span id="searchIcon">🔍</span><span class="ml-1">搜尋訂單</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 對帳單單頁主體 -->
+  <div class="a4-sheet text-slate-900 flex flex-col justify-between box-border border border-slate-200 rounded-sm">
+    <div>
+      <!-- 頂部資訊區 -->
+      <div class="grid grid-cols-12 border-b-2 border-slate-800 pb-1.5 text-sm md:text-base leading-snug">
+        <!-- 左欄 -->
+        <div class="col-span-6 pr-4 space-y-1">
+          <h2 class="text-lg md:text-xl font-black text-slate-900 tracking-wide font-serif-tc">鍠嘉文化教育用品社</h2>
+          <div class="text-slate-700 space-y-1 text-xs md:text-sm">
+            <p><span class="font-bold text-slate-900">地 址：</span>彰化縣員林市員大路一段250巷15號</p>
+            <p><span class="font-bold text-slate-900">電 話：</span><span class="font-mono-num font-semibold text-slate-800">04-8392577</span></p>
+            <p><span class="font-bold text-slate-900">傳 真：</span><span class="font-mono-num font-semibold text-slate-800">04-8285424</span></p>
+          </div>
+        </div>
+        <!-- 右欄 -->
+        <div class="col-span-6 pl-4 border-l-2 border-slate-200 space-y-1 text-xs md:text-sm text-slate-700">
+          <p class="flex items-center">
+            <span class="font-bold text-slate-900 whitespace-nowrap">學校名稱：</span>
+            <input type="text" id="txtSchoolName" name="schoolName" value="" oninput="syncSchoolToInvoice(this.value)" placeholder="例：彰化縣員林市青山國民小學" class="font-bold text-slate-900 flex-1 border-b border-slate-400 outline-none px-1 text-sm md:text-base placeholder:text-slate-400 placeholder:font-normal">
+          </p>
+          <p class="flex items-center">
+            <span class="font-bold text-slate-900 whitespace-nowrap">電  話：</span>
+            <input type="text" id="txtSchoolPhone" name="schoolPhone" value="" placeholder="例：04-8310401" class="font-mono-num flex-1 border-b border-slate-400 outline-none px-1 font-semibold text-slate-850 placeholder:text-slate-400 placeholder:font-normal">
+          </p>
+          <p class="flex items-center">
+            <span class="font-bold text-slate-900 whitespace-nowrap">承&nbsp;&nbsp;辦&nbsp;&nbsp;人：</span>
+            <input type="text" id="txtContactPerson" name="contactPerson" value="" placeholder="例：教師 林老師 / 設備組長" class="font-semibold text-slate-900 flex-1 border-b border-slate-400 outline-none px-1 placeholder:text-slate-400 placeholder:font-normal">
+          </p>
+          <p class="flex items-center">
+            <span class="font-bold text-slate-900 whitespace-nowrap">地  址：</span>
+            <input type="text" id="txtSchoolAddress" name="schoolAddress" value="" placeholder="例：彰化縣員林市出水里湶洲巷3號" class="flex-1 border-b border-slate-400 outline-none px-1 text-xs md:text-sm placeholder:text-slate-400">
+          </p>
+        </div>
+      </div>
+
+      <!-- 單據主標題、開單日期與印章 -->
+      <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-400">
+        <div class="flex items-baseline gap-4 flex-wrap">
+          <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-widest font-serif-tc border-b-2 border-slate-900 pb-0.5">對帳單</h1>
+          <div class="text-xs md:text-sm text-slate-700 flex items-center gap-1.5">
+            <span class="font-bold">單據號碼：</span>
+            <input type="text" id="txtOrderNo" name="orderNo" value="" placeholder="請輸入單號或點擊搜尋載入" class="font-mono-num font-black text-red-700 border-b border-slate-400 outline-none w-56 text-sm md:text-base placeholder:text-slate-400 placeholder:font-normal">
+          </div>
+          <div class="text-xs md:text-sm text-slate-700 flex items-center gap-1">
+            <span class="font-bold">開單日期：</span>
+            <input type="text" id="txtOrderDate" name="orderDate" value="" title="開啟當天日期 (可自由微調)" class="font-mono-num font-bold text-slate-800 border-b border-slate-400 outline-none w-36 text-center text-xs md:text-sm bg-transparent cursor-pointer">
+          </div>
+        </div>
+        <div class="flex items-center pr-2">
+          <img id="companyStampImg" src="assets/stamp.png" alt="鍠嘉文化教育用品社 印章" class="h-14 md:h-16 object-contain select-none pointer-events-none transform -rotate-1 drop-shadow-sm print:drop-shadow-none print:filter-none">
+        </div>
+      </div>
+
+      <!-- 對帳明細表格 -->
+      <table class="w-full border-collapse border-2 border-slate-700 text-center my-1.5 text-xs md:text-sm leading-normal">
+        <thead>
+          <tr class="bg-slate-100 font-bold border-b-2 border-slate-700 text-slate-900 text-xs md:text-sm">
+            <th class="border border-slate-600 py-1 w-10">編號</th>
+            <th class="border border-slate-600 py-1 px-3 text-left w-64">書名</th>
+            <th class="border border-slate-600 py-1 w-16 bg-amber-50/50">訂量</th>
+            <th class="border border-slate-600 py-1 w-16 text-emerald-800">增訂量</th>
+            <th class="border border-slate-600 py-1 w-16 text-red-700">退書量</th>
+            <th class="border border-slate-600 py-1 w-16 bg-blue-100/50">結帳量</th>
+            <th class="border border-slate-600 py-1 w-16">學生價</th>
+            <th class="border border-slate-600 py-1 w-24 bg-amber-50/50">結帳金額</th>
+            <th class="border border-slate-600 py-1 w-20">備註</th>
+          </tr>
+        </thead>
+        <tbody id="statementTableBody"></tbody>
+        <tfoot>
+          <tr class="font-bold bg-slate-50 border-t-2 border-slate-800 text-sm md:text-base">
+            <td colspan="7" class="border border-slate-600 py-1.5 px-4 text-right tracking-wider text-slate-900 font-bold">應付書款金額：</td>
+            <td class="border border-slate-600 py-1.5 font-mono-num font-black text-red-700 text-lg md:text-xl"><span id="txtGrandTotal">0</span></td>
+            <td class="border border-slate-600 py-1.5 text-xs md:text-sm text-slate-600 font-medium">元整</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- 說明事項與匯款帳號 (分批金額(2)換行對齊) -->
+      <div class="border-2 border-slate-400 p-2 text-xs md:text-sm space-y-1.5 rounded bg-slate-50/70 leading-relaxed my-1">
+        <div class="font-bold text-slate-900 flex items-center gap-1.5 text-sm md:text-base">
+          <span class="w-2 h-4 bg-red-700 rounded-sm"></span><span>說明事項 ：</span>
+        </div>
+        <div class="grid grid-cols-12 gap-4">
+          
+          <!-- 左側：發票指示 -->
+          <div class="col-span-6 space-y-1.5 text-slate-800 pr-3 border-r border-slate-300 flex flex-col justify-between">
+            <div>
+              <p class="font-semibold text-slate-900 leading-snug">一、發票如需配合學校做特殊規定開立時，請於本欄指示說明：</p>
+              
+              <div class="pl-2 space-y-2 text-xs md:text-sm text-slate-700 mt-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900 whitespace-nowrap w-24">發票抬頭：</span>
+                  <input type="text" id="txtInvoiceTitle" name="invoiceTitle" class="gov-field-line flex-1 px-1.5 py-0.5 outline-none font-bold text-slate-900 text-xs md:text-sm placeholder:text-slate-400 placeholder:font-normal" placeholder="同上方學校全名 (可自由修改)">
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900 whitespace-nowrap w-24">統一編號：</span>
+                  <input type="text" id="txtInvoiceTaxId" name="invoiceTaxId" maxlength="8" class="gov-field-line w-44 px-1.5 py-0.5 outline-none font-bold font-mono-num text-slate-900 text-center tracking-widest text-xs md:text-sm placeholder:text-slate-400 placeholder:font-normal" placeholder="學校統編 (8碼)">
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900 whitespace-nowrap w-24">發票張數：</span>
+                  <input type="number" id="txtInvoiceCount" name="invoiceCount" min="1" class="gov-field-line w-16 px-1.5 py-0.5 outline-none font-bold font-mono-num text-slate-900 text-center" placeholder="1">
+                  <span class="font-medium text-slate-700">張</span>
+                  <span class="text-[10px] text-slate-400 ml-2 no-print">(若需分開開立請於下方填寫各筆金額)</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900 whitespace-nowrap w-24">分批金額(1)：</span>
+                  <input type="text" id="txtInvoiceAmt1" name="invoiceAmt1" class="gov-field-line w-44 px-2 py-0.5 outline-none font-bold font-mono-num text-red-700 text-center placeholder:text-slate-300 placeholder:font-normal" placeholder="輸入金額(1)">
+                  <span class="text-xs text-slate-500 font-medium">元</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-900 whitespace-nowrap w-24">分批金額(2)：</span>
+                  <input type="text" id="txtInvoiceAmt2" name="invoiceAmt2" class="gov-field-line w-44 px-2 py-0.5 outline-none font-bold font-mono-num text-red-700 text-center placeholder:text-slate-300 placeholder:font-normal" placeholder="輸入金額(2)">
+                  <span class="text-xs text-slate-500 font-medium">元</span>
+                </div>
+              </div>
+            </div>
+            <p class="pt-2 mt-auto text-xs"><strong class="text-slate-900">二、(1)</strong> 退書請通知業務到校收回。</p>
+          </div>
+
+          <!-- 右側：付款方式 -->
+          <div class="col-span-6 space-y-1 text-slate-800 pl-2">
+            <div class="flex items-center justify-between">
+              <p><strong class="text-slate-900">(2)</strong> 書款請利用下列方式擇一辦理：</p>
+              <span class="text-[11px] text-red-700 font-bold bg-red-50 border border-red-200 px-1.5 py-0.2 rounded no-print">👇 點擊下方卡片即可切換選擇</span>
+            </div>
+            
+            <div id="boxPay1" onclick="selectPayment(1)" class="pay-card bg-red-50/80 border-2 border-red-600 p-2 rounded-lg space-y-0.5 text-xs md:text-sm shadow-sm cursor-pointer transition">
+              <p class="font-bold flex items-center justify-between text-red-950">
+                <span class="flex items-center gap-1.5">
+                  <span id="radioIcon1" class="text-base text-red-700">🔘</span>
+                  <span class="font-black text-red-900">1. 供應商銀行匯款帳號 (附匯款同意書)：</span>
+                </span>
+                <span id="tagSelected1" class="text-[10px] bg-red-700 text-white font-bold px-1.5 py-0.2 rounded no-print">已選用</span>
+              </p>
+              <p class="pl-5"><span class="font-bold text-slate-900">銀 行：</span>台中銀行員林分行</p>
+              <p class="pl-5"><span class="font-bold text-slate-900">帳 號：</span><span class="font-mono-num font-bold text-red-700 text-sm md:text-base tracking-wider">067221057230</span></p>
+              <p class="pl-5"><span class="font-bold text-slate-900">戶 名：</span>鍠嘉文化教育用品社 黃依華</p>
+            </div>
+
+            <div id="boxPay2" onclick="selectPayment(2)" class="pay-card bg-white border-2 border-slate-300 p-2 mt-1.5 rounded-lg text-xs md:text-sm cursor-pointer transition hover:border-slate-400 shadow-xs">
+              <p class="font-bold flex items-center justify-between text-slate-800">
+                <span class="flex items-center gap-1.5">
+                  <span id="radioIcon2" class="text-base text-slate-400">⚪</span>
+                  <span>2. 開立禁止背書轉讓支票：</span>
+                </span>
+                <span id="tagSelected2" class="text-[10px] bg-slate-400 text-white font-bold px-1.5 py-0.2 rounded hidden no-print">點擊選用</span>
+              </p>
+              <p class="pl-5 text-slate-600 leading-relaxed pt-0.5">抬頭指定「<strong>鍠嘉文化教育用品社</strong>」（可直接交由業務或附回郵信封寄回）</p>
+            </div>
+
+            <p class="text-xs text-slate-500 pt-1">三、如有任何問題歡迎來電洽詢，我們將竭誠為您服務。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部：簽核欄 -->
+    <div class="mt-1 pt-1 border-t-2 border-slate-300">
+      <div class="flex justify-between items-center text-sm md:text-base text-slate-900 px-8 font-serif-tc">
+        <div>校長：_________________________</div>
+        <div>教務處：_________________________</div>
+        <div>經辦人：_________________________</div>
+      </div>
+      <div class="text-center text-xs text-slate-500 mt-1">※ 彰化縣員林市員大路一段250巷15號 ｜ 電話：04-8392577 ｜ 傳真：04-8285424</div>
+    </div>
+  </div>
+
+  <!-- 搜尋結果 Modal 視窗 -->
+  <div id="searchModal" class="fixed inset-0 bg-slate-900/60 z-50 justify-center items-start pt-20 no-print transition-opacity">
+    <div class="bg-white rounded-xl shadow-2xl w-[90%] max-w-2xl overflow-hidden border border-slate-200">
+      <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">📄 選擇要對帳的訂單</h3>
+        <button onclick="closeSearchModal()" class="text-slate-400 hover:text-red-600 font-bold text-xl">&times;</button>
+      </div>
+      <div class="p-0 max-h-[60vh] overflow-y-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-slate-100 text-slate-600 text-xs uppercase sticky top-0">
+            <tr>
+              <th class="px-4 py-3 border-b">填單日期</th>
+              <th class="px-4 py-3 border-b">學校名稱</th>
+              <th class="px-4 py-3 border-b">單據類別</th>
+              <th class="px-4 py-3 border-b">單號</th>
+              <th class="px-4 py-3 border-b text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody id="searchResultBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeSearchModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-semibold transition">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== GAS 唯一 API 部署端點 ====================
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyC6ibSq2874CKZIJVgqrJRYMB9UKOD2pXI_-iRceYdmn67BwiYo6sa_4y4_UwUyWKt/exec";
+
+    // 支援完整代碼與簡短代碼雙向對應
+    const PRICE_BOOK_MAP_115_2 = {
+      'Wow-G1-B2-課本': { name: 'WOW Story 2 課本', price: 210 }, 'Wow-G1-B2-習作': { name: 'WOW Story 2 習作', price: 85 },
+      'Wow-G2-B4-課本': { name: 'WOW Story 4 課本', price: 210 }, 'Wow-G2-B4-習作': { name: 'WOW Story 4 習作', price: 85 },
+      'WOSP-G1-B2-課本': { name: 'WOW Story Phonics 2 課本', price: 210 }, 'WOSP-G1-B2-習作': { name: 'WOW Story Phonics 2 習作', price: 85 },
+      'WOSP-G2-B4-課本': { name: 'WOW Story Phonics 4 課本', price: 210 }, 'WOSP-G2-B4-習作': { name: 'WOW Story Phonics 4 習作', price: 85 },
+      'FW-G1-B2-課本': { name: 'Fun World 2 課本', price: 210 }, 'FW-G1-B2-習作': { name: 'Fun World 2 習作', price: 85 },
+      'FW-G2-B4-課本': { name: 'Fun World 4 課本', price: 210 }, 'FW-G2-B4-習作': { name: 'Fun World 4 習作', price: 85 },
+      'GM-G1-B2-課本': { name: 'Go Magic! 2 課本', price: 210 }, 'GM-G1-B2-習作': { name: 'Go Magic! 2 習作', price: 85 },
+      'GM-G2-B4-課本': { name: 'Go Magic! 4 課本', price: 210 }, 'GM-G2-B4-習作': { name: 'Go Magic! 4 習作', price: 85 },
+      'SF-G3-B2-課本': { name: 'Super Fun 2 課本', price: 210 }, 'SF-G3-B2-習作': { name: 'Super Fun 2 習作', price: 85 }, 'SF-G3-B2-開通卡': { name: 'Super Fun 2 學生電子書開通卡', price: 180 },
+      'SF-G4-B4-課本': { name: 'Super Fun 4 課本', price: 210 }, 'SF-G4-B4-習作': { name: 'Super Fun 4 習作', price: 85 }, 'SF-G4-B4-開通卡': { name: 'Super Fun 4 學生電子書開通卡', price: 180 },
+      'SF-G5-B6-課本': { name: 'Super Fun 6 課本', price: 210 }, 'SF-G5-B6-習作': { name: 'Super Fun 6 習作', price: 85 }, 'SF-G5-B6-開通卡': { name: 'Super Fun 6 學生電子書開通卡', price: 180 },
+      'SF-G6-B8-課本': { name: 'Super Fun 8 課本', price: 210 }, 'SF-G6-B8-習作': { name: 'Super Fun 8 習作', price: 85 }, 'SF-G6-B8-開通卡': { name: 'Super Fun 8 學生電子書開通卡', price: 180 },
+      // 相容無冊別簡短 Key
+      'Wow-G1-課本': { name: 'WOW Story 2 課本', price: 210 }, 'Wow-G1-習作': { name: 'WOW Story 2 習作', price: 85 },
+      'Wow-G2-課本': { name: 'WOW Story 4 課本', price: 210 }, 'Wow-G2-習作': { name: 'WOW Story 4 習作', price: 85 },
+      'WOSP-G1-課本': { name: 'WOW Story Phonics 2 課本', price: 210 }, 'WOSP-G1-習作': { name: 'WOW Story Phonics 2 習作', price: 85 },
+      'WOSP-G2-課本': { name: 'WOW Story Phonics 4 課本', price: 210 }, 'WOSP-G2-習作': { name: 'WOW Story Phonics 4 習作', price: 85 },
+      'FW-G1-課本': { name: 'Fun World 2 課本', price: 210 }, 'FW-G1-習作': { name: 'Fun World 2 習作', price: 85 },
+      'FW-G2-課本': { name: 'Fun World 4 課本', price: 210 }, 'FW-G2-習作': { name: 'Fun World 4 習作', price: 85 },
+      'GM-G1-課本': { name: 'Go Magic! 2 課本', price: 210 }, 'GM-G1-習作': { name: 'Go Magic! 2 習作', price: 85 },
+      'GM-G2-課本': { name: 'Go Magic! 4 課本', price: 210 }, 'GM-G2-習作': { name: 'Go Magic! 4 習作', price: 85 },
+      'SF-G3-課本': { name: 'Super Fun 2 課本', price: 210 }, 'SF-G3-習作': { name: 'Super Fun 2 習作', price: 85 }, 'SF-G3-開通卡': { name: 'Super Fun 2 學生電子書開通卡', price: 180 },
+      'SF-G4-課本': { name: 'Super Fun 4 課本', price: 210 }, 'SF-G4-習作': { name: 'Super Fun 4 習作', price: 85 }, 'SF-G4-開通卡': { name: 'Super Fun 4 學生電子書開通卡', price: 180 },
+      'SF-G5-課本': { name: 'Super Fun 6 課本', price: 210 }, 'SF-G5-習作': { name: 'Super Fun 6 習作', price: 85 }, 'SF-G5-開通卡': { name: 'Super Fun 6 學生電子書開通卡', price: 180 },
+      'SF-G6-課本': { name: 'Super Fun 8 課本', price: 210 }, 'SF-G6-習作': { name: 'Super Fun 8 習作', price: 85 }, 'SF-G6-開通卡': { name: 'Super Fun 8 學生電子書開通卡', price: 180 }
+    };
+
+    let currentStatementRows = Array.from({ length: 10 }, () => ({ name: '', orderQty: '', appendQty: '', refundQty: '', finalQty: '', price: '', remark: '' }));
+    let selectedPaymentOption = 1;
+    let cachedTeacherEmail = ""; // 快取承辦老師 Email
+
+    // 自動填入開啟當天實際民國年月日
+    function initActualCurrentDate() {
+      const now = new Date();
+      const rocYear = now.getFullYear() - 1911;
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const date = String(now.getDate()).padStart(2, '0');
+      const dateStr = `${rocYear}年${month}月${date}日`;
+      const dateInput = document.getElementById('txtOrderDate');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = dateStr;
+      }
+    }
+
+    // 當學校名稱改變時，發票抬頭自動同步
+    function syncSchoolToInvoice(schoolName) {
+      const invTitle = document.getElementById('txtInvoiceTitle');
+      if (invTitle && (!invTitle.value || invTitle.dataset.autofilled === "true")) {
+        invTitle.value = schoolName.trim();
+        invTitle.dataset.autofilled = "true";
+      }
+    }
+
+    function renderStatementTable() {
+      const tbody = document.getElementById('statementTableBody');
+      tbody.innerHTML = '';
+      currentStatementRows.forEach((row, i) => {
+        const finalQtyVal = parseInt(row.finalQty) || 0;
+        const priceVal = parseInt(row.price) || 0;
+        let finalAmount = (row.name && row.finalQty !== '') ? (finalQtyVal * priceVal).toLocaleString() : '';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-400";
+        tr.innerHTML = `
+          <td class="border border-slate-500 py-1 font-mono-num text-xs md:text-sm text-slate-500">${i + 1}</td>
+          <td class="border border-slate-500 py-1 px-3 text-left"><input type="text" name="bookName_${i}" value="${escapeHtml(row.name)}" oninput="updateRowField(${i}, 'name', this.value)" placeholder="${i < 3 ? '可手動輸入書名或由上方載入' : ''}" class="w-full bg-transparent outline-none font-bold text-slate-800 text-xs md:text-sm placeholder:text-slate-300 placeholder:font-normal"></td>
+          <td class="border border-slate-500 py-1 bg-amber-50/50"><input type="number" name="orderQty_${i}" readonly value="${row.orderQty !== '' ? row.orderQty : ''}" class="w-full text-center bg-transparent outline-none font-mono-num font-bold text-slate-500 text-sm md:text-base cursor-not-allowed" tabindex="-1"></td>
+          <td class="border border-slate-500 py-1 bg-emerald-50/30"><input type="number" name="appendQty_${i}" min="0" value="${row.appendQty !== '' ? row.appendQty : ''}" oninput="updateRowField(${i}, 'appendQty', this.value)" class="w-full text-center bg-transparent outline-none font-mono-num font-bold text-emerald-800 text-sm md:text-base"></td>
+          <td class="border border-slate-500 py-1 bg-red-50/30"><input type="number" name="refundQty_${i}" min="0" value="${row.refundQty !== '' ? row.refundQty : ''}" oninput="updateRowField(${i}, 'refundQty', this.value)" class="w-full text-center bg-transparent outline-none font-mono-num font-bold text-red-600 text-sm md:text-base"></td>
+          <td class="border border-slate-500 py-1 bg-blue-100/50 shadow-inner"><input type="number" name="finalQty_${i}" min="0" value="${row.finalQty !== '' ? row.finalQty : ''}" oninput="updateRowField(${i}, 'finalQty', this.value)" class="w-full text-center bg-transparent outline-none font-mono-num font-black text-blue-900 text-sm md:text-base"></td>
+          <td class="border border-slate-500 py-1 bg-slate-50"><input type="number" name="price_${i}" readonly value="${row.price !== '' ? row.price : ''}" class="w-full text-center bg-transparent outline-none font-mono-num font-semibold text-slate-500 text-xs md:text-sm cursor-not-allowed" tabindex="-1"></td>
+          <td id="rowTotal_${i}" class="border border-slate-500 py-1 bg-amber-50/30 font-mono-num font-bold text-red-700 text-sm md:text-base">${finalAmount}</td>
+          <td class="border border-slate-500 py-1 px-1"><input type="text" name="remark_${i}" value="${escapeHtml(row.remark)}" oninput="updateRowField(${i}, 'remark', this.value)" class="w-full text-center bg-transparent outline-none text-xs text-slate-600"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      calculateGrandTotal();
+    }
+
+    function updateRowField(index, field, value) {
+      currentStatementRows[index][field] = value;
+      if (['name', 'finalQty'].includes(field)) {
+        const row = currentStatementRows[index];
+        const finalAmountStr = (row.name && row.finalQty !== '') ? ((parseInt(row.finalQty) || 0) * (parseInt(row.price) || 0)).toLocaleString() : '';
+        const cell = document.getElementById(`rowTotal_${index}`);
+        if (cell) cell.textContent = finalAmountStr;
+        calculateGrandTotal();
+      }
+    }
+
+    function calculateGrandTotal() {
+      let total = 0;
+      currentStatementRows.forEach(row => {
+        if (row.name && row.finalQty !== '') total += ((parseInt(row.finalQty) || 0) * (parseInt(row.price) || 0));
+      });
+      document.getElementById('txtGrandTotal').textContent = total.toLocaleString();
+    }
+
+    function callJsonp(params, onSuccess, onError) {
+      const callbackName = 'jsonp_stmt_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      params.callback = callbackName;
+
+      const queryString = Object.keys(params)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
+        .join('&');
+
+      window[callbackName] = function(response) {
+        delete window[callbackName];
+        const elem = document.getElementById(callbackName);
+        if (elem) elem.remove();
+        onSuccess(response);
+      };
+
+      const script = document.createElement('script');
+      script.id = callbackName;
+      script.src = `${GAS_WEBAPP_URL}?${queryString}`;
+      script.onerror = function() {
+        delete window[callbackName];
+        script.remove();
+        if (onError) onError();
+      };
+      document.body.appendChild(script);
+    }
+
+    function searchFromGasCloud() {
+      const keyword = document.getElementById('inputSearchKeyword').value.trim();
+      const date = document.getElementById('inputSearchDate').value.trim();
+      
+      if (!keyword && !date) {
+        alert("請輸入學校關鍵字或單號進行搜尋！");
+        return;
+      }
+
+      const btn = document.getElementById('btnSearch');
+      const icon = document.getElementById('searchIcon');
+      icon.innerHTML = '<span class="loader"></span>';
+      btn.disabled = true;
+
+      callJsonp({
+        action: 'search',
+        keyword: keyword,
+        date: date
+      }, function(data) {
+        icon.innerHTML = '🔍';
+        btn.disabled = false;
+
+        if (data && data.status === 'success' && data.results && data.results.length > 0) {
+          if (data.results.length === 1) {
+            fetchOrderDetails(data.results[0].orderId);
+          } else {
+            showSearchModal(data.results);
+          }
+        } else {
+          alert(`找不到符合條件的訂單：\n關鍵字: ${keyword}\n日期: ${date}`);
+        }
+      }, function() {
+        icon.innerHTML = '🔍';
+        btn.disabled = false;
+        alert("連線失敗，請檢查網路連線或確認 GAS 部署網址是否正確！");
+      });
+    }
+
+    function showSearchModal(results) {
+      const tbody = document.getElementById('searchResultBody');
+      tbody.innerHTML = '';
+      results.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-blue-50 transition border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-slate-500 font-mono">${item.dateStr}</td>
+          <td class="px-4 py-3 font-bold text-slate-800">${item.schoolName}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-xs font-semibold">${item.orderTypeLabel}</span></td>
+          <td class="px-4 py-3 text-slate-600 font-mono text-xs">${item.orderId}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="fetchOrderDetails('${item.orderId}')" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded shadow-sm font-bold text-xs">載入對帳</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('searchModal').classList.add('active');
+    }
+
+    function closeSearchModal() {
+      document.getElementById('searchModal').classList.remove('active');
+    }
+
+    function fetchOrderDetails(orderId) {
+      closeSearchModal();
+      const badge = document.getElementById('loadSourceBadge');
+      badge.textContent = "資料載入中...";
+      badge.className = "text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded border font-mono animate-pulse";
+
+      callJsonp({
+        action: 'getOrderByNo',
+        orderId: orderId
+      }, function(data) {
+        if (data && data.status === 'success' && data.order) {
+          populateOrderToStatement(data.order, '雲端資料庫');
+        } else {
+          alert("無法載入該筆訂單明細：" + (data.message || "未知錯誤"));
+          badge.textContent = "載入失敗";
+          badge.className = "text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded border font-mono";
+        }
+      }, function() {
+        alert("載入失敗：無法與 Google Apps Script 建立連線");
+        badge.textContent = "連線失敗";
+        badge.className = "text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded border font-mono";
+      });
+    }
+
+    // ⭐ 方案 B 核心：不需修改 GAS，前端自動解析中文標題與原始 JSON
+    function populateOrderToStatement(orderData, sourceTag) {
+      if (!orderData) return;
+
+      // 1. 嘗試解析 GAS 儲存在最後一欄的原始 JSON (若有的話)
+      let rawParsed = {};
+      for (let k in orderData) {
+        let val = orderData[k];
+        if (typeof val === 'string' && val.trim().startsWith('{') && val.includes('"items"')) {
+          try { rawParsed = JSON.parse(val); break; } catch (e) {}
+        }
+      }
+
+      // 2. 輔助函式：依關鍵字從物件中尋找對應欄位值
+      function findVal(keys, fallbackIdx) {
+        for (let key of keys) {
+          if (orderData[key] !== undefined && orderData[key] !== "") return orderData[key];
+          if (rawParsed[key] !== undefined && rawParsed[key] !== "") return rawParsed[key];
+        }
+        // 模糊比對中文標題
+        for (let k in orderData) {
+          for (let key of keys) {
+            if (k.includes(key) && orderData[k] !== undefined && orderData[k] !== "") {
+              return orderData[k];
+            }
+          }
+        }
+        const vals = Object.values(orderData);
+        return (fallbackIdx !== undefined && vals[fallbackIdx] !== undefined) ? vals[fallbackIdx] : '';
+      }
+
+      const city = String(findVal(['schoolCity', '縣市'], 8) || '').trim();
+      const district = String(findVal(['schoolDistrict', '鄉鎮市區', '鄉鎮', '市區'], 9) || '').trim();
+      const sName = String(findVal(['schoolName', '學校名稱', '學校'], 10) || '').trim();
+
+      let fullSchool = '';
+      if (sName) {
+        let cleanName = sName.replace(/國民小學|國小/g, '').trim();
+        let prefix = '';
+        if (!cleanName.includes(city) && city) {
+          prefix += (city.includes('縣') || city.includes('市')) ? city : (city + '縣');
+        }
+        if (!cleanName.includes(district) && district) {
+          prefix += district;
+        }
+        fullSchool = `${prefix}${cleanName}國民小學`;
+      }
+
+      document.getElementById('txtSchoolName').value = fullSchool;
+      const invTitle = document.getElementById('txtInvoiceTitle');
+      if (invTitle) {
+        invTitle.value = fullSchool;
+        invTitle.dataset.autofilled = "true";
+      }
+
+      const phone = String(findVal(['contactPhone', '聯絡電話', '電話'], 12) || '').trim();
+      const person = String(findVal(['contactPerson', '承辦人', '聯絡人'], 11) || '').trim();
+      const address = String(findVal(['schoolAddress', '學校地址', '地址'], 14) || '').trim();
+      const ordId = String(findVal(['orderId', '訂單編號', '單號'], 1) || '').trim();
+      const email = String(findVal(['contactEmail', 'email', 'Email', '信箱'], 13) || '').trim();
+
+      document.getElementById('txtSchoolPhone').value = phone;
+      document.getElementById('txtContactPerson').value = person ? (person.includes('教師') || person.includes('老師') || person.includes('組長') || person.includes('主任') ? person : `教師 ${person}`) : '';
+      document.getElementById('txtSchoolAddress').value = address;
+      if (ordId) document.getElementById('txtOrderNo').value = ordId;
+      cachedTeacherEmail = email;
+
+      // 3. 取得書籍訂購明細 (優先從試算表欄位讀取最新修改數量，若無則讀取 rawParsed.items)
+      let itemsMap = {};
+      const vals = Object.values(orderData);
+
+      // 從試算表固定欄位索引 (17~56) 提取最新數量 (確保後台修改過也能同步反映)
+      const sheetBookMapping = [
+        ['WOSP-G1-B2-課本', 17], ['WOSP-G1-B2-習作', 18],
+        ['WOSP-G2-B4-課本', 20], ['WOSP-G2-B4-習作', 21],
+        ['Wow-G1-B2-課本', 23],  ['Wow-G1-B2-習作', 24],
+        ['Wow-G2-B4-課本', 26],  ['Wow-G2-B4-習作', 27],
+        ['FW-G1-B2-課本', 29],   ['FW-G1-B2-習作', 30],
+        ['FW-G2-B4-課本', 32],   ['FW-G2-B4-習作', 33],
+        ['GM-G1-B2-課本', 35],   ['GM-G1-B2-習作', 36],
+        ['GM-G2-B4-課本', 38],   ['GM-G2-B4-習作', 39],
+        ['SF-G3-B2-課本', 41],   ['SF-G3-B2-習作', 42], ['SF-G3-B2-開通卡', 43],
+        ['SF-G4-B4-課本', 45],   ['SF-G4-B4-習作', 46], ['SF-G4-B4-開通卡', 47],
+        ['SF-G5-B6-課本', 49],   ['SF-G5-B6-習作', 50], ['SF-G5-B6-開通卡', 51],
+        ['SF-G6-B8-課本', 53],   ['SF-G6-B8-習作', 54], ['SF-G6-B8-開通卡', 55]
+      ];
+
+      let hasSheetItems = false;
+      if (vals.length >= 56) {
+        sheetBookMapping.forEach(([bookKey, idx]) => {
+          const q = parseInt(vals[idx]) || 0;
+          if (q > 0) {
+            itemsMap[bookKey] = q;
+            hasSheetItems = true;
+          }
+        });
+      }
+
+      // 若試算表欄位無數量，則退回使用 orderData.items 或 rawParsed.items
+      if (!hasSheetItems) {
+        itemsMap = orderData.items || rawParsed.items || {};
+      }
+
+      currentStatementRows = Array.from({ length: 10 }, () => ({ name: '', orderQty: '', appendQty: '', refundQty: '', finalQty: '', price: '', remark: '' }));
+      let rowIndex = 0;
+      Object.entries(itemsMap).forEach(([key, qty]) => {
+        if (rowIndex >= 10 || parseInt(qty) <= 0 || key.includes('教用') || key.includes('教師')) return;
+        if ((key.includes('SF-') || key.includes('Super Fun')) && !key.includes('開通卡')) return;
+
+        let matched = PRICE_BOOK_MAP_115_2[key];
+        let bookName = matched ? matched.name : key;
+        let bookPrice = matched ? matched.price : (key.includes('習作') ? 85 : (key.includes('開通卡') ? 180 : 210));
+        currentStatementRows[rowIndex++] = { name: bookName, orderQty: parseInt(qty), finalQty: '', appendQty: '', refundQty: '', price: bookPrice, remark: '' };
+      });
+
+      renderStatementTable();
+      const badge = document.getElementById('loadSourceBadge');
+      badge.textContent = `✅ 來源: ${sourceTag}`;
+      badge.className = "text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 font-mono font-bold";
+    }
+
+    function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    
+    function resetStatement() {
+      if (!confirm('確定要清空目前對帳單內容嗎？')) return;
+      ['txtSchoolName','txtSchoolPhone','txtContactPerson','txtSchoolAddress','txtOrderNo','txtInvoiceTitle','txtInvoiceTaxId','txtInvoiceCount','txtInvoiceAmt1','txtInvoiceAmt2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.value = '';
+          if (el.dataset) delete el.dataset.autofilled;
+        }
+      });
+      cachedTeacherEmail = "";
+      initActualCurrentDate();
+      currentStatementRows = Array.from({ length: 10 }, () => ({ name: '', orderQty: '', appendQty: '', refundQty: '', finalQty: '', price: '', remark: '' }));
+      renderStatementTable();
+      selectPayment(1);
+      document.getElementById('loadSourceBadge').textContent = "已重置待命";
+    }
+
+    function selectPayment(option) {
+      selectedPaymentOption = option;
+      const b1 = document.getElementById('boxPay1'), b2 = document.getElementById('boxPay2');
+      const r1 = document.getElementById('radioIcon1'), r2 = document.getElementById('radioIcon2');
+      const t1 = document.getElementById('tagSelected1'), t2 = document.getElementById('tagSelected2');
+
+      if (option === 1) {
+        b1.className = "pay-card bg-red-50/80 border-2 border-red-600 p-2 rounded-lg space-y-0.5 text-xs md:text-sm shadow-sm cursor-pointer transition";
+        b2.className = "pay-card bg-white border-2 border-slate-300 p-2 mt-1.5 rounded-lg text-xs md:text-sm cursor-pointer transition hover:border-slate-400 shadow-xs";
+        r1.textContent = "🔘"; r1.className = "text-base text-red-700";
+        r2.textContent = "⚪"; r2.className = "text-base text-slate-400";
+        t1.classList.remove('hidden');
+        t2.classList.add('hidden');
+      } else {
+        b2.className = "pay-card bg-red-50/80 border-2 border-red-600 p-2 mt-1.5 rounded-lg text-xs md:text-sm shadow-sm cursor-pointer transition";
+        b1.className = "pay-card bg-white border-2 border-slate-300 p-2 rounded-lg space-y-0.5 text-xs md:text-sm cursor-pointer transition hover:border-slate-400 shadow-xs";
+        r2.textContent = "🔘"; r2.className = "text-base text-red-700";
+        r1.textContent = "⚪"; r1.className = "text-base text-slate-400";
+        t2.classList.remove('hidden');
+        t1.classList.add('hidden');
+      }
+    }
+
+    // ⭐ 核心功能：線上回傳對帳結果至雲端資料庫與發送信件
+    function submitReconciliationToCloud() {
+      const schoolName = document.getElementById('txtSchoolName').value.trim();
+      const contactPerson = document.getElementById('txtContactPerson').value.trim();
+      const schoolPhone = document.getElementById('txtSchoolPhone').value.trim();
+      const schoolAddress = document.getElementById('txtSchoolAddress').value.trim();
+      const orderNo = document.getElementById('txtOrderNo').value.trim();
+      const orderDate = document.getElementById('txtOrderDate').value.trim();
+      const invoiceTitle = document.getElementById('txtInvoiceTitle').value.trim();
+      const invoiceTaxId = document.getElementById('txtInvoiceTaxId').value.trim();
+      const invoiceCount = parseInt(document.getElementById('txtInvoiceCount').value.trim()) || 1;
+      const invoiceAmt1 = document.getElementById('txtInvoiceAmt1').value.trim();
+      const invoiceAmt2 = document.getElementById('txtInvoiceAmt2').value.trim();
+
+      // 1. 防呆校核
+      if (!schoolName) {
+        alert("請先填寫「學校名稱」！");
+        document.getElementById('txtSchoolName').focus();
+        return;
+      }
+
+      const validItems = currentStatementRows
+        .filter(r => r.name && r.finalQty !== '' && parseInt(r.finalQty) > 0)
+        .map(r => ({
+          name: r.name,
+          unit: r.name.includes('開通卡') ? '套' : '本',
+          price: parseInt(r.price) || 0,
+          orderQty: parseInt(r.orderQty) || 0,
+          appendQty: parseInt(r.appendQty) || 0,
+          refundQty: parseInt(r.refundQty) || 0,
+          settledQty: parseInt(r.finalQty) || 0,
+          subtotal: (parseInt(r.price) || 0) * (parseInt(r.finalQty) || 0),
+          remark: r.remark || ''
+        }));
+
+      if (validItems.length === 0) {
+        alert("請先在明細表中填寫各項教材的「結帳量」，再進行線上回傳！");
+        return;
+      }
+
+      let grandTotal = 0;
+      validItems.forEach(it => grandTotal += it.subtotal);
+
+      // 2. 分批金額校驗
+      if (invoiceAmt1 || invoiceAmt2) {
+        const amt1 = parseInt(invoiceAmt1) || 0;
+        const amt2 = parseInt(invoiceAmt2) || 0;
+        if (amt1 + amt2 !== grandTotal) {
+          if (!confirm(`⚠️ 注意：您填寫的分批金額加總 ($${(amt1 + amt2).toLocaleString()}) 與應付總額 ($${grandTotal.toLocaleString()}) 不符！\n\n是否仍確認要依此資料回傳？`)) {
+            return;
+          }
+        }
+      }
+
+      const confirmMsg = `請確認是否回傳以下結算資訊：\n` +
+        `----------------------------------------\n` +
+        `學校全銜：${schoolName}\n` +
+        `單據號碼：${orderNo || '自動指派'}\n` +
+        `對帳日期：${orderDate}\n` +
+        `教材項數：共 ${validItems.length} 項\n` +
+        `應付總額：$${grandTotal.toLocaleString()} 元整\n` +
+        `發票抬頭：${invoiceTitle || schoolName}\n` +
+        `付款方式：${selectedPaymentOption === 2 ? '支票付款' : '銀行匯款'}\n` +
+        `----------------------------------------\n` +
+        `確認後將即時寫入《115-2對帳結算回報總表》並發送確認 Email！`;
+
+      if (!confirm(confirmMsg)) return;
+
+      const btn = document.getElementById('btnSubmitReconcile');
+      const icon = document.getElementById('submitIcon');
+      btn.disabled = true;
+      icon.innerHTML = '<span class="loader"></span>';
+      btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+      btn.classList.add('bg-slate-500');
+
+      // 3. 封裝傳輸 Payload
+      const payload = {
+        action: "submitReconciliation",
+        orderId: orderNo,
+        orderDate: orderDate,
+        schoolName: schoolName,
+        contactPerson: contactPerson,
+        schoolPhone: schoolPhone,
+        schoolAddress: schoolAddress,
+        contactEmail: cachedTeacherEmail,
+        invoiceTitle: invoiceTitle || schoolName,
+        invoiceTaxId: invoiceTaxId,
+        invoiceCount: invoiceCount,
+        invoiceAmt1: invoiceAmt1,
+        invoiceAmt2: invoiceAmt2,
+        paymentOption: selectedPaymentOption,
+        grandTotal: grandTotal,
+        items: validItems
+      };
+
+      // 4. 動態表單 POST 傳送 (突破跨域阻擋)
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GAS_WEBAPP_URL;
+      form.target = 'hidden_reconcile_frame';
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+
+      let iframe = document.getElementById('hidden_reconcile_frame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'hidden_reconcile_frame';
+        iframe.name = 'hidden_reconcile_frame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      setTimeout(() => {
+        btn.disabled = false;
+        icon.innerHTML = '✅';
+        btn.classList.remove('bg-slate-500');
+        btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        alert(`🎉 恭喜！【${schoolName}】的對帳結算資料已成功回傳！\n\n1. 資料已同步儲存於 Google Sheets《115-2對帳結算回報總表》。\n2. 系統已自動發送對帳收據確認信至經銷商與承辦信箱。\n3. 您亦可直接點擊「產製採購四表」列印核銷公文！`);
+      }, 2500);
+    }
+
+    // 打包跳轉至 結算明細表.html
+    function exportToFourForms() {
+      const schoolName = document.getElementById('txtSchoolName').value.trim();
+      const contactPerson = document.getElementById('txtContactPerson').value.trim();
+      const schoolPhone = document.getElementById('txtSchoolPhone').value.trim();
+      const grandTotal = document.getElementById('txtGrandTotal').textContent.trim();
+      const orderDate = document.getElementById('txtOrderDate').value.trim();
+      const invoiceTitle = document.getElementById('txtInvoiceTitle').value.trim();
+      const invoiceTaxId = document.getElementById('txtInvoiceTaxId').value.trim();
+
+      const validItems = currentStatementRows
+        .filter(r => r.name && r.finalQty !== '' && parseInt(r.finalQty) > 0)
+        .map(r => ({
+          name: r.name,
+          unit: r.name.includes('開通卡') ? '套' : '本',
+          price: parseInt(r.price) || 0,
+          contractQty: parseInt(r.orderQty) || parseInt(r.finalQty) || 0,
+          settledQty: parseInt(r.finalQty) || 0,
+          remark: r.remark || ''
+        }));
+
+      if (validItems.length === 0) {
+        alert('請先在對帳單中填寫「結帳量」，再點擊產製採購四表！');
+        return;
+      }
+
+      if (validItems.length > 9) {
+        if (!confirm(`目前對帳單共有 ${validItems.length} 項教材，採購結算明細表固定為單頁 9 列，系統將自動截取前 9 項，是否確認繼續？`)) {
+          return;
+        }
+      }
+
+      const exportPayload = {
+        timestamp: Date.now(),
+        schoolName: schoolName,
+        contactPerson: contactPerson,
+        schoolPhone: schoolPhone,
+        grandTotal: grandTotal,
+        orderDate: orderDate,
+        invoiceTitle: invoiceTitle,
+        invoiceTaxId: invoiceTaxId,
+        paymentOption: selectedPaymentOption,
+        items: validItems.slice(0, 9)
+      };
+
+      localStorage.setItem('TRANSFER_FOUR_FORMS_DATA', JSON.stringify(exportPayload));
+      window.open('結算明細表.html', '_blank');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initActualCurrentDate();
+      renderStatementTable();
+      const orderId = new URLSearchParams(window.location.search).get('orderId');
+      if (orderId) {
+        document.getElementById('inputSearchKeyword').value = orderId;
+        searchFromGasCloud();
+      }
+    });
+  </script>
+</body>
+</html>

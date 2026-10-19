@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>彰化縣國民小學 - 採購結算核銷四表</title>
+  
+  <style id="dynamic-print-style">
+    @page { size: A4 landscape; margin: 0mm; }
+    @page landscape-sheet { size: A4 landscape; margin: 0mm; }
+    @page portrait-sheet { size: A4 portrait; margin: 0mm; }
+    .sheet-landscape { page: landscape-sheet; }
+    .sheet-portrait { page: portrait-sheet; }
+  </style>
+
+  <style>
+    @charset "utf-8";
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #525659;
+      font-family: "標楷體", "DFKai-SB", "BiauKai", "TW-Kai", serif;
+      color: #000;
+      line-height: 1.25;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .btn-blue { background: #2563eb; color: #fff; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-purple { background: #7c3aed; color: #fff; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-amber { background: #d97706; color: #fff; }
+    .btn-amber:hover { background: #b45309; }
+
+    .view-tabs {
+      display: flex;
+      background: #1e293b;
+      padding: 3px;
+      border-radius: 6px;
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #94a3b8;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #2563eb;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .pages-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 0 60px;
+    }
+
+    .page-sheet {
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      position: relative;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .sheet-landscape {
+      width: 297mm;
+      height: 210mm;
+      min-height: 210mm;
+      max-height: 210mm;
+      padding: 6.5mm 8mm;
+    }
+
+    .sheet-portrait {
+      width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+      max-height: 297mm;
+      padding: 7.5mm 9mm;
+    }
+
+    .header-box {
+      margin-bottom: 2mm;
+      width: 100%;
+    }
+    .header-title {
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .header-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      font-weight: bold;
+      margin-top: 2mm;
+      padding: 0 2px;
+    }
+
+    table.table-gov {
+      width: 100% !important;
+      border-collapse: collapse;
+      border: 1.5px solid #000;
+      font-size: 13px;
+      line-height: 1.22;
+      table-layout: fixed;
+      margin: 0;
+    }
+    table.table-gov th, table.table-gov td {
+      border: 1px solid #000;
+      padding: 2.5px 3.5px;
+      vertical-align: middle;
+      text-align: center;
+      position: relative;
+      word-break: break-all;
+    }
+
+    [contenteditable="true"] { outline: none; }
+    [contenteditable="true"]:hover { background-color: rgba(254, 240, 138, 0.45); }
+    [contenteditable="true"]:focus { background-color: #fef08a; }
+
+    /* ⭐ 明顯方塊樣式 (方塊內留空，方便老師自由鍵入或紙本填寫) */
+    .date-input-box {
+      display: inline-block;
+      min-width: 38px;
+      height: 20px;
+      line-height: 19px;
+      border: 1.5px solid #2563eb;
+      background-color: #ffffff;
+      border-radius: 3px;
+      text-align: center;
+      vertical-align: middle;
+      font-family: "JetBrains Mono", monospace, "標楷體";
+      font-weight: bold;
+      color: #0f172a;
+      margin: 0 2px;
+      padding: 0 2px;
+      cursor: text;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);
+      transition: all 0.15s ease;
+    }
+    .date-input-box:focus {
+      background-color: #eff6ff !important;
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25);
+    }
+    .date-input-box-sm {
+      min-width: 28px;
+    }
+
+    /* 印章樣式 (統一放大 1.5 倍：高度 23mm) */
+    .stamp-img {
+      height: 23mm !important;
+      max-width: 65mm;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+      filter: contrast(1.15);
+      user-select: none;
+      pointer-events: none;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* 存摺封面容器與圖片 (原始比例無失真) */
+    .passbook-frame {
+      width: 100%;
+      height: 104mm;
+      margin: 0 auto;
+      position: relative;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    .passbook-img-real {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      margin: auto;
+    }
+
+    @media print {
+      body { background: transparent !important; }
+      .toolbar { display: none !important; }
+      .pages-container { padding: 0 !important; gap: 0 !important; }
+      .page-sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        page-break-after: always;
+        break-after: page;
+      }
+      .page-sheet.hide-print { display: none !important; }
+      [contenteditable="true"]:hover, [contenteditable="true"]:focus { background: transparent !important; }
+      /* 列印時方塊自動還原為公文底線風格 */
+      .date-input-box {
+        border: none !important;
+        border-bottom: 1px solid #000 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部操作工具列 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span style="font-weight: 700; color: #38bdf8;">📋 國小英語教材 採購核銷四表系統</span>
+      <div class="view-tabs">
+        <button class="tab-btn active" id="btnTab1" onclick="switchTab('form1', this)">表一 結算明細表(橫)</button>
+        <button class="tab-btn" id="btnTab2" onclick="switchTab('form2', this)">表二 驗收記錄(直)</button>
+        <button class="tab-btn" id="btnTab3" onclick="switchTab('form3', this)">表三 驗收證明書(直)</button>
+        <button class="tab-btn" id="btnTab4" onclick="switchTab('form4', this)">表四 匯款同意書(直)</button>
+        <button class="tab-btn" id="btnTabAll" onclick="switchTab('all', this)">全覽四表</button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-blue" onclick="printForm1Landscape()">🖨️ 列印表一 (A4 橫式滿版)</button>
+      <button class="btn btn-purple" onclick="printForms234Portrait()">🖨️ 列印表二~四 (A4 直式滿版)</button>
+      <button class="btn btn-amber" onclick="calcTotals()">🔄 重新計算金額大寫</button>
+    </div>
+  </div>
+
+  <div class="pages-container">
+
+    <!-- ========================================================================= -->
+    <!-- 第一表：結算明細表 (A4 橫向滿版)                                           -->
+    <!-- ========================================================================= -->
+    <div class="page-sheet sheet-landscape" id="form1">
+      <div class="header-box">
+        <div class="header-title" id="form1SchoolTitle" style="font-size: 20px;" contenteditable="true">
+          彰化縣員林市青山國民小學
+        </div>
+        <div class="header-title" style="font-size: 18px; letter-spacing: 4px; margin-top: 1px;" contenteditable="true">
+          結算明細表
+        </div>
+        <!-- 填表日期：預設當天，可自由編輯 -->
+        <div style="display: flex; justify-content: flex-end; font-size: 13px; font-weight: bold; margin-top: 1px;">
+          <span>填表日期：</span><span id="dateFillForm1" contenteditable="true"></span>
+        </div>
+      </div>
+
+      <table class="table-gov" style="height: 156mm;">
+        <colgroup>
+          <col style="width: 3.5%;">
+          <col style="width: 18.2%;">
+          <col style="width: 5.6%;">
+          <col style="width: 4.7%;">
+          <col style="width: 7.5%;">
+          <col style="width: 6.5%;">
+          <col style="width: 10.3%;">
+          <col style="width: 6.6%;">
+          <col style="width: 9.3%;">
+          <col style="width: 7.5%;">
+          <col style="width: 7.7%;">
+          <col style="width: 12.6%;">
+        </colgroup>
+
+        <thead>
+          <tr style="height: 13mm;">
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">案號及契約號</th>
+            <th colspan="5" style="text-align: left; padding-left: 6px;" contenteditable="true"></th>
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">廠商名稱</th>
+            <th colspan="3" style="text-align: left; padding: 1px 8px; position: relative; overflow: visible;">
+              <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span contenteditable="true" style="font-weight: bold; white-space: nowrap; font-size: 13.5px;">鍠嘉文化教育用品社</span>
+                <img src="assets/stamp.png" class="stamp-img" alt="鍠嘉文化教育用品社 印章">
+              </div>
+            </th>
+          </tr>
+
+          <tr style="height: 11mm;">
+            <th colspan="2" style="font-weight: bold; letter-spacing: 1px;">標的名稱及數量摘要</th>
+            <th colspan="5" id="form1SubjectSummary" style="text-align: left; padding-left: 6px; font-size: 12px; line-height: 1.3;" contenteditable="true">
+              115學年度青山國民小學非審定本教科圖書議價作業(出版商:何嘉仁實業股份有限公司)
+            </th>
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">契約金額</th>
+            <th colspan="3" id="chineseTotal1" style="font-weight: bold;" contenteditable="true">
+              新台幣伍萬捌仟柒佰玖拾陸元整
+            </th>
+          </tr>
+
+          <tr style="height: 7mm;">
+            <th rowspan="2" style="font-weight: bold;">項<br>次</th>
+            <th rowspan="2" style="font-weight: bold; letter-spacing: 2px;">項目名稱</th>
+            <th rowspan="2" style="font-weight: bold;">說<br>明</th>
+            <th rowspan="2" style="font-weight: bold;">單<br>位</th>
+            <th rowspan="2" style="font-weight: bold;">單 價</th>
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">契 約</th>
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">結 算 結 果</th>
+            <th colspan="2" style="font-weight: bold; letter-spacing: 2px;">增 減 金 額</th>
+            <th rowspan="2" style="font-weight: bold;">備 註</th>
+          </tr>
+          <tr style="height: 7mm;">
+            <th style="font-weight: bold;">數 量</th>
+            <th style="font-weight: bold;">金 額</th>
+            <th style="font-weight: bold;">數 量</th>
+            <th style="font-weight: bold;">金 額</th>
+            <th style="font-weight: bold;">增加金額</th>
+            <th style="font-weight: bold;">減少金額</th>
+          </tr>
+        </thead>
+
+        <tbody id="gridRows">
+          <tr style="height: 10.8mm;">
+            <td>1</td>
+            <td style="text-align: left;" contenteditable="true">WOW Story 2 課本</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">本</td>
+            <td class="r-price" contenteditable="true">205</td>
+            <td class="r-c-qty" contenteditable="true">44</td>
+            <td class="r-c-amt">9020</td>
+            <td class="r-s-qty" contenteditable="true">44</td>
+            <td class="r-s-amt">9020</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>2</td>
+            <td style="text-align: left;" contenteditable="true">WOW Story 2 習作</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">本</td>
+            <td class="r-price" contenteditable="true">87</td>
+            <td class="r-c-qty" contenteditable="true">44</td>
+            <td class="r-c-amt">3828</td>
+            <td class="r-s-qty" contenteditable="true">44</td>
+            <td class="r-s-amt">3828</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>3</td>
+            <td style="text-align: left;" contenteditable="true">WOW Story 4 課本</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">本</td>
+            <td class="r-price" contenteditable="true">205</td>
+            <td class="r-c-qty" contenteditable="true">39</td>
+            <td class="r-c-amt">7995</td>
+            <td class="r-s-qty" contenteditable="true">39</td>
+            <td class="r-s-amt">7995</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>4</td>
+            <td style="text-align: left;" contenteditable="true">WOW Story 4 習作</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">本</td>
+            <td class="r-price" contenteditable="true">87</td>
+            <td class="r-c-qty" contenteditable="true">39</td>
+            <td class="r-c-amt">3393</td>
+            <td class="r-s-qty" contenteditable="true">39</td>
+            <td class="r-s-amt">3393</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>5</td>
+            <td style="text-align: left;" contenteditable="true">Super Fun 2 學生電子書開通卡</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">套</td>
+            <td class="r-price" contenteditable="true">180</td>
+            <td class="r-c-qty" contenteditable="true">46</td>
+            <td class="r-c-amt">8280</td>
+            <td class="r-s-qty" contenteditable="true">46</td>
+            <td class="r-s-amt">8280</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>6</td>
+            <td style="text-align: left;" contenteditable="true">Super Fun 4 學生電子書開通卡</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">套</td>
+            <td class="r-price" contenteditable="true">180</td>
+            <td class="r-c-qty" contenteditable="true">38</td>
+            <td class="r-c-amt">6840</td>
+            <td class="r-s-qty" contenteditable="true">38</td>
+            <td class="r-s-amt">6840</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>7</td>
+            <td style="text-align: left;" contenteditable="true">Super Fun 6 學生電子書開通卡</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">套</td>
+            <td class="r-price" contenteditable="true">180</td>
+            <td class="r-c-qty" contenteditable="true">59</td>
+            <td class="r-c-amt">10620</td>
+            <td class="r-s-qty" contenteditable="true">59</td>
+            <td class="r-s-amt">10620</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>8</td>
+            <td style="text-align: left;" contenteditable="true">Super Fun 8 學生電子書開通卡</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true">套</td>
+            <td class="r-price" contenteditable="true">180</td>
+            <td class="r-c-qty" contenteditable="true">49</td>
+            <td class="r-c-amt">8820</td>
+            <td class="r-s-qty" contenteditable="true">49</td>
+            <td class="r-s-amt">8820</td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 10.8mm;">
+            <td>9</td>
+            <td style="text-align: left;" contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="r-price" contenteditable="true"></td>
+            <td class="r-c-qty" contenteditable="true"></td>
+            <td class="r-c-amt"></td>
+            <td class="r-s-qty" contenteditable="true"></td>
+            <td class="r-s-amt"></td>
+            <td class="r-plus"></td>
+            <td class="r-minus"></td>
+            <td contenteditable="true"></td>
+          </tr>
+        </tbody>
+
+        <tfoot>
+          <tr style="height: 10mm; font-weight: bold;">
+            <td colspan="5" style="letter-spacing: 4px;">金額總計</td>
+            <td></td>
+            <td id="totalContract" style="text-align: right; padding-right: 6px;">58796</td>
+            <td></td>
+            <td id="totalSettled" style="text-align: right; padding-right: 6px;">58796</td>
+            <td id="totalPlus">0</td>
+            <td id="totalMinus">0</td>
+            <td></td>
+          </tr>
+          <tr style="height: 20mm;">
+            <td colspan="7" style="vertical-align: top; text-align: left; padding: 4px 6px;">
+              <span style="font-weight: bold;">機關內部承辦監工(造)單位主管及人員或承辦採購單位主管及人員</span>
+            </td>
+            <td colspan="5" style="vertical-align: bottom; text-align: right; padding: 4px 12px; position: relative;">
+              <span style="font-weight: bold; position: absolute; left: 6px; top: 4px;">機關首長或其授權人員</span>
+              <span style="font-weight: bold;">(簽章)</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 第二表：驗收記錄 (A4 直向滿版)                                             -->
+    <!-- ========================================================================= -->
+    <div class="page-sheet sheet-portrait" id="form2">
+      <div class="header-box">
+        <div class="header-title" id="form2Title" style="font-size: 21px;" contenteditable="true">
+          彰化縣員林市青山國民小學&nbsp;&nbsp;&nbsp;&nbsp;驗收記錄
+        </div>
+        <div class="header-meta">
+          <div><span>日期：</span><span id="dateVerifyForm2" contenteditable="true"></span></div>
+          <span contenteditable="true" id="form2Location">地點： 彰化縣員林市青山國民小學</span>
+        </div>
+      </div>
+
+      <table class="table-gov">
+        <colgroup>
+          <col style="width: 20%;">
+          <col style="width: 32%;">
+          <col style="width: 18%;">
+          <col style="width: 30%;">
+        </colgroup>
+        <tbody>
+          <tr style="height: 12mm;">
+            <td style="font-weight: bold;">廠商名稱</td>
+            <td style="text-align: left; padding: 2px 6px; overflow: visible;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span contenteditable="true" style="font-weight: bold; white-space: nowrap;">鍠嘉文化教育用品社</span>
+                <img src="assets/stamp.png" class="stamp-img" alt="鍠嘉文化教育用品社 印章">
+              </div>
+            </td>
+            <td style="font-weight: bold;">驗收批次</td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 11mm;">
+            <td style="font-weight: bold;">採購金額</td>
+            <td colspan="3" style="text-align: left; padding-left: 8px;" contenteditable="true">
+              v 未達公告金額□公告金額以上未達查核金額□查核金額以上未達巨額□巨額
+            </td>
+          </tr>
+          <!-- ⭐ 履約期限與完成履約日期：在 年 月 日 中間加上明顯空白方塊 -->
+          <tr style="height: 11mm;">
+            <td style="font-weight: bold;">履約期限</td>
+            <td>
+              <span class="date-input-box" contenteditable="true"></span>年<span class="date-input-box date-input-box-sm" contenteditable="true"></span>月<span class="date-input-box date-input-box-sm" contenteditable="true"></span>日
+            </td>
+            <td rowspan="2" style="font-weight: bold;">履約有無逾期</td>
+            <td rowspan="2" contenteditable="true">□逾期&nbsp;&nbsp;v 未逾期</td>
+          </tr>
+          <tr style="height: 11mm;">
+            <td style="font-weight: bold;">完成履<br>約日期</td>
+            <td>
+              <span class="date-input-box" contenteditable="true"></span>年<span class="date-input-box date-input-box-sm" contenteditable="true"></span>月<span class="date-input-box date-input-box-sm" contenteditable="true"></span>日
+            </td>
+          </tr>
+          <tr style="height: 11mm;">
+            <td style="font-weight: bold;">契約金額</td>
+            <td id="contractAmt2" style="font-weight: bold;" contenteditable="true">新台幣伍萬捌仟柒佰玖拾陸元整</td>
+            <td style="font-weight: bold;">契約變更或加減價次數</td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 38mm;">
+            <td colspan="4" style="text-align: left; vertical-align: top; padding: 8px 10px; font-size: 14px;">
+              <div style="font-weight: bold; margin-bottom: 6px;">【驗收經過】</div>
+              <div contenteditable="true" style="line-height: 1.6; text-indent: 2em;">
+                數量及版本合於契約，請准予驗收。
+              </div>
+            </td>
+          </tr>
+          <tr style="height: 52mm;">
+            <td colspan="4" style="text-align: left; vertical-align: top; padding: 8px 10px; font-size: 14px;">
+              <div style="font-weight: bold; margin-bottom: 6px;">【驗收結果】：</div>
+              <div contenteditable="true" style="line-height: 1.6;">
+                與契約、圖說、貨樣規定相符。<br><br>
+                ﹝改善拆除重作退換貨之期限﹞：<br><br>
+                ﹝備註﹞：
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="table-gov" style="margin-top: -1.5px; height: 80mm;">
+        <colgroup>
+          <col style="width: 14.28%;">
+          <col style="width: 14.28%;">
+          <col style="width: 14.28%;">
+          <col style="width: 14.28%;">
+          <col style="width: 14.28%;">
+          <col style="width: 14.32%;">
+          <col style="width: 14.28%;">
+        </colgroup>
+        <thead>
+          <tr style="height: 12mm; font-weight: bold; font-size: 13px;">
+            <td>主驗人員</td>
+            <td>上級機關<br>監驗人員</td>
+            <td>本機關<br>監驗人員</td>
+            <td>協驗人員<br>（無者免）</td>
+            <td>會驗人員<br>（無者免）</td>
+            <td style="color: #991b1b;">廠商</td>
+            <td>記錄</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="height: 68mm; vertical-align: bottom;">
+            <td style="padding-bottom: 6px;">（簽章）</td>
+            <td style="padding-bottom: 6px;">（簽章）</td>
+            <td style="padding-bottom: 6px;">（簽章）</td>
+            <td style="padding-bottom: 6px;">（簽章）</td>
+            <td style="padding-bottom: 6px;">（簽章）</td>
+            <td style="padding-bottom: 6px; vertical-align: middle; overflow: visible;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                <img src="assets/stamp.png" class="stamp-img" alt="鍠嘉文化教育用品社 印章">
+                <div style="font-size: 11px;">（簽章）</div>
+              </div>
+            </td>
+            <td style="padding-bottom: 6px;">（簽章）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 第三表：財物結算驗收證明書 (A4 直向滿版)                                   -->
+    <!-- ========================================================================= -->
+    <div class="page-sheet sheet-portrait" id="form3">
+      <div class="header-box">
+        <div class="header-title" id="form3Title" style="font-size: 21px;" contenteditable="true">
+          彰化縣員林市青山國民小學 財物結算驗收證明書
+        </div>
+        <div style="display: flex; justify-content: flex-end; font-size: 13.5px; margin-top: 2mm; font-weight: bold;">
+          <span>填發日期：</span><span id="dateVerifyForm3" contenteditable="true"></span>
+        </div>
+      </div>
+
+      <table class="table-gov" style="height: 238mm;">
+        <colgroup>
+          <col style="width: 14%;">
+          <col style="width: 15%;">
+          <col style="width: 18%;">
+          <col style="width: 17%;">
+          <col style="width: 16%;">
+          <col style="width: 20%;">
+        </colgroup>
+        <tbody>
+          <tr style="height: 12mm;">
+            <td style="font-weight: bold;">廠商名稱</td>
+            <td colspan="2" style="text-align: left; padding: 2px 6px; overflow: visible;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span contenteditable="true" style="font-weight: bold; white-space: nowrap;">鍠嘉文化教育用品社</span>
+                <img src="assets/stamp.png" class="stamp-img" alt="鍠嘉文化教育用品社 印章">
+              </div>
+            </td>
+            <td style="font-weight: bold;">採購金額</td>
+            <td colspan="2" style="text-align: left; padding-left: 6px; font-size: 12px;" contenteditable="true">
+              v 未達公告金額□公告金額以上未達查核金額□查核金額以上未達巨額□巨額
+            </td>
+          </tr>
+          <!-- ⭐ 履約期限、完成履約日期、開始驗收日期：皆設置明顯空白方塊 -->
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">履約期限</td>
+            <td colspan="2">
+              <span class="date-input-box" contenteditable="true"></span>年<span class="date-input-box date-input-box-sm" contenteditable="true"></span>月<span class="date-input-box date-input-box-sm" contenteditable="true"></span>日
+            </td>
+            <td style="font-weight: bold;">履約地點</td>
+            <td colspan="2" id="form3Location" contenteditable="true">彰化縣員林市青山國民小學</td>
+          </tr>
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">完成履約日期</td>
+            <td colspan="2">
+              <span class="date-input-box" contenteditable="true"></span>年<span class="date-input-box date-input-box-sm" contenteditable="true"></span>月<span class="date-input-box date-input-box-sm" contenteditable="true"></span>日
+            </td>
+            <td style="font-weight: bold;">開始驗收日期</td>
+            <td colspan="2">
+              <span class="date-input-box" contenteditable="true"></span>年<span class="date-input-box date-input-box-sm" contenteditable="true"></span>月<span class="date-input-box date-input-box-sm" contenteditable="true"></span>日
+            </td>
+          </tr>
+          <tr style="height: 9mm;">
+            <td style="font-weight: bold;">履約逾期總天數</td>
+            <td contenteditable="true">0</td>
+            <td style="font-weight: bold;">不計違約金天數</td>
+            <td contenteditable="true"></td>
+            <td style="font-weight: bold;">應計違約天數</td>
+            <td contenteditable="true"></td>
+          </tr>
+          <tr style="height: 9mm;">
+            <td style="font-weight: bold;">逾期違約金</td>
+            <td contenteditable="true">0</td>
+            <td style="font-weight: bold;">其它違約金</td>
+            <td contenteditable="true">0</td>
+            <td colspan="2"></td>
+          </tr>
+          <tr style="height: 9mm;">
+            <td style="font-weight: bold;">契約金額</td>
+            <td colspan="5" id="contractAmt3" style="text-align: left; padding-left: 10px; font-weight: bold;" contenteditable="true">
+              新台幣伍萬捌仟柒佰玖拾陸元整
+            </td>
+          </tr>
+
+          <tr style="height: 8mm; font-weight: bold;">
+            <td rowspan="3">增<br>減<br>價<br>款</td>
+            <td>次別</td>
+            <td>第一次</td>
+            <td>第二次</td>
+            <td colspan="2">合計</td>
+          </tr>
+          <tr style="height: 8mm;">
+            <td style="font-weight: bold;">增加金額</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td colspan="2" contenteditable="true"></td>
+          </tr>
+          <tr style="height: 8mm;">
+            <td style="font-weight: bold;">減少金額</td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td colspan="2" contenteditable="true"></td>
+          </tr>
+
+          <tr style="height: 9mm;">
+            <td style="font-weight: bold;">驗收扣款</td>
+            <td colspan="5" style="text-align: left; padding-left: 10px;" contenteditable="true">零</td>
+          </tr>
+          <tr style="height: 9mm;">
+            <td style="font-weight: bold;">結算總價</td>
+            <td colspan="5" id="settledAmt3" style="text-align: left; padding-left: 10px; font-weight: bold;" contenteditable="true">
+              新台幣伍萬捌仟柒佰玖拾陸元整
+            </td>
+          </tr>
+
+          <tr style="height: 40mm;">
+            <td style="font-weight: bold;">驗<br>收<br>意<br>見</td>
+            <td colspan="5" style="text-align: left; vertical-align: top; padding: 6px 10px;" contenteditable="true">
+              １ 與契約、圖說、貨樣規定相符<br>
+              ２ 數量及版本合於契約<br>
+              ３ 日期同於驗收紀錄<br>
+              ４ 請准予驗收
+            </td>
+          </tr>
+
+          <tr style="height: 52mm;">
+            <td colspan="3" style="text-align: center; vertical-align: middle;">
+              <div style="font-weight: bold; font-size: 16px; letter-spacing: 4px; color: #555;">機關印信</div>
+              <div style="font-size: 11px; color: #888;">(蓋印處)</div>
+            </td>
+            <td colspan="3" style="vertical-align: top; text-align: left; padding: 6px 8px;">
+              <div style="height: 13mm; border-bottom: 1px dashed #999;">主驗人員：</div>
+              <div style="height: 13mm; border-bottom: 1px dashed #999;">上級機關監驗人員：</div>
+              <div style="height: 13mm; border-bottom: 1px dashed #999;">本機關監驗人員：</div>
+              <div style="height: 13mm;">承辦人員：</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size: 11px; line-height: 1.35; margin-top: 3mm; color: #111;" contenteditable="true">
+        說明：<br>
+        一、本證明書份數請各機關自行依需要備具。<br>
+        二、「結算總價」之計算方式為「契約金額」加「增加金額」減「減少金額」減「驗收扣款」 。<br>
+        三、本證明書所定欄位如不敷使用，得新增其它欄位或增補續頁。<br>
+        四、本證明書原則不得塗改，並應依公文處理程序簽核後加蓋驗收機關印信；供機關自存者得免蓋。
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 第四表：匯款同意書 (A4 直向滿版)                                           -->
+    <!-- ========================================================================= -->
+    <div class="page-sheet sheet-portrait" id="form4">
+      <div class="header-box">
+        <div class="header-title" style="font-size: 23px; letter-spacing: 4px;" contenteditable="true">
+          匯 款 同 意 書
+        </div>
+        <div id="form4Notice" style="font-size: 14px; line-height: 1.7; margin-top: 5px; text-indent: 2em;" contenteditable="true">
+          立同意書人 <span style="font-weight: bold; border-bottom: 1px solid #000; padding: 0 4px;">鍠嘉文化教育用品社</span>，同意<span id="form4SchoolNotice">彰化縣員林市青山國民小學</span>將給付款項，直接匯存入立同意書人之金融機構存款帳戶，匯款手續費逕由款項中扣除。
+        </div>
+      </div>
+
+      <table class="table-gov" style="font-size: 14px;">
+        <colgroup>
+          <col style="width: 26%;">
+          <col style="width: 74%;">
+        </colgroup>
+        <tbody>
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">戶名</td>
+            <td style="text-align: left; padding-left: 10px; font-weight: bold;" contenteditable="true">
+              鍠嘉文化教育用品社 黃依華
+              <span style="font-size: 12px; font-weight: normal; color: #444;">（務必與存摺戶名一致 ，需為立同意書人所有）</span>
+            </td>
+          </tr>
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">金融機構名稱</td>
+            <td style="text-align: left; padding-left: 10px;" contenteditable="true">
+              台中 銀行/郵局 員林 分行，
+            </td>
+          </tr>
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">銀行及分行代號</td>
+            <td style="text-align: left; padding-left: 10px; font-family: monospace; font-size: 15px; font-weight: bold;" contenteditable="true">
+              053-0123
+            </td>
+          </tr>
+          <tr style="height: 10mm;">
+            <td style="font-weight: bold;">帳號</td>
+            <td style="text-align: left; padding-left: 10px; font-family: monospace; font-size: 16px; font-weight: bold; letter-spacing: 1px;" contenteditable="true">
+              067-22-1057230
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size: 12.5px; line-height: 1.5; margin-top: 3mm;" contenteditable="true">
+        一、 本同意書如有虛偽或糾紛情事，立同意書人願負法律責任，其後果自行負責處理。<br>
+        二、 本同意書一經簽認即適用本公司在貴校所有款項之給付，立同意書人之匯款帳戶若有變動，或欲改變領款方式，將主動通知貴校，若未事前通知致權益受損，其後果自行負責。<br>
+        <div style="margin-top: 2px;" id="form4Recipient">此致 &nbsp;&nbsp;&nbsp;&nbsp; 彰化縣青山國民小學</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2mm; padding: 2px 4px;">
+        <div style="font-size: 13px; line-height: 1.7;" contenteditable="true">
+          <div>立 同 意 書 人：<span style="font-weight: bold;">鍠嘉文化教育用品社</span></div>
+          <div>（即公司、商號名稱）</div>
+          <div>營利事業統一編號：<span style="font-weight: bold; font-family: monospace;">45817387</span></div>
+          <div>負&nbsp;&nbsp;&nbsp;&nbsp;責&nbsp;&nbsp;&nbsp;&nbsp;人：<span style="font-weight: bold;">黃依華</span></div>
+          <div>身 分 證 字 號：<span style="font-weight: bold; font-family: monospace;">N223932787</span></div>
+          <div>公&nbsp;&nbsp;司&nbsp;&nbsp;住&nbsp;&nbsp;址：彰化縣員林市員大路一段250巷 15 號</div>
+          <div>電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：04-8392577</div>
+          <div style="margin-top: 2px; font-weight: bold;" id="dateForm4Agreement"></div>
+        </div>
+
+        <div style="display: flex; gap: 8mm; align-items: center; overflow: visible;">
+          <div style="text-align: center; overflow: visible;">
+            <img src="assets/stamp.png" class="stamp-img" alt="公司印章">
+            <div style="font-size: 12px; margin-top: 2px;">（蓋章）</div>
+          </div>
+
+          <div style="border: 1px dashed #666; width: 44mm; height: 32mm; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible;">
+            <div style="position: absolute; top: 1mm; font-size: 11px; color: #666;">公 司 發 票 章：</div>
+            <img src="assets/stamp.png" class="stamp-img" style="height: 20mm !important;" alt="發票章">
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 11.5px; line-height: 1.4; margin-top: 2mm;" contenteditable="true">
+        ※備註：<br>
+        一、請檢附存摺封面影本一份（並註明『本影本與正本相同，如有不實，願負法律責任』）。<br>
+        二、加蓋印章請與「請款文件」相同。<br>
+        三、立同意書人應依照金融機構之收費標準自付跨行手續費，並同意逕由應付款項內扣款。
+      </div>
+
+      <div style="border: 1.5px solid #000; padding: 4px 6px; margin-top: 3mm; position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <span style="font-weight: bold; font-size: 12px;">【存摺封面黏貼處】</span>
+          <span style="font-size: 12px; color: #b91c1c; font-weight: bold;">
+            『本影本與正本相同，如有不實，願負法律責任』
+          </span>
+        </div>
+
+        <div class="passbook-frame">
+          <img src="assets/存摺_2.jpg" 
+               class="passbook-img-real" 
+               id="passbookRealImg" 
+               alt="台中商業銀行存摺封面真實圖片"
+               onerror="if(this.src.indexOf('assets/存摺_2.jpg')!==-1){this.src='存摺_2.jpg';}else if(this.src.indexOf('存摺_2.jpg')!==-1){this.src='assets/存摺.jpg';}else if(this.src.indexOf('assets/存摺.jpg')!==-1){this.src='存摺.jpg';}">
+
+          <div style="position: absolute; right: 10mm; bottom: -4mm; z-index: 20;">
+            <img src="assets/stamp.png" class="stamp-img" style="height: 16mm !important;" alt="騎縫章">
+            <span style="display: block; font-size: 10px; color: #b91c1c; font-weight: bold; text-align: center;">(騎縫章)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 自動取得開啟當天之民國年月日
+    function getTodayRocString() {
+      const now = new Date();
+      const rocYear = now.getFullYear() - 1911;
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const date = String(now.getDate()).padStart(2, '0');
+      return `${rocYear}年${month}月${date}日`;
+    }
+
+    // 初始化公文填表日期為當天
+    function initDefaultDates() {
+      const todayStr = getTodayRocString();
+      const f1Date = document.getElementById('dateFillForm1');
+      if (f1Date && !f1Date.innerText.trim()) f1Date.innerText = todayStr;
+      
+      const f2Date = document.getElementById('dateVerifyForm2');
+      if (f2Date && !f2Date.innerText.trim()) f2Date.innerText = todayStr;
+      
+      const f3Date = document.getElementById('dateVerifyForm3');
+      if (f3Date && !f3Date.innerText.trim()) f3Date.innerText = todayStr;
+      
+      const f4Date = document.getElementById('dateForm4Agreement');
+      if (f4Date && !f4Date.innerText.trim()) {
+        f4Date.innerText = `中華民國 ${todayStr.replace('年',' 年 ').replace('月',' 月 ')}`;
+      }
+    }
+
+    function numToChinese(num) {
+      if (isNaN(num) || num <= 0) return '新台幣零元整';
+      const digits = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
+      const units = ['', '拾', '佰', '仟', '萬', '拾', '佰', '仟', '億'];
+      let str = Math.floor(num).toString();
+      let result = '';
+      let len = str.length;
+      for (let i = 0; i < len; i++) {
+        let n = parseInt(str[i]);
+        let p = len - i - 1;
+        if (n !== 0) {
+          result += digits[n] + units[p];
+        } else {
+          if (!result.endsWith('零') && p !== 4 && p !== 8) {
+            result += '零';
+          }
+          if (p === 4) result += '萬';
+          if (p === 8) result += '億';
+        }
+      }
+      result = result.replace(/零+/g, '零').replace(/零萬/, '萬').replace(/零+$/, '');
+      return '新台幣' + result + '元整';
+    }
+
+    function calcTotals() {
+      const rows = document.querySelectorAll('#gridRows tr');
+      let sumContract = 0;
+      let sumSettled = 0;
+      let sumPlus = 0;
+      let sumMinus = 0;
+
+      rows.forEach(r => {
+        const pEl = r.querySelector('.r-price');
+        const cqEl = r.querySelector('.r-c-qty');
+        const sqEl = r.querySelector('.r-s-qty');
+        if (!pEl) return;
+
+        const p = parseFloat(pEl.innerText.trim()) || 0;
+        const cq = parseFloat(cqEl.innerText.trim()) || 0;
+        const sq = parseFloat(sqEl.innerText.trim()) || 0;
+
+        const ca = p * cq;
+        const sa = p * sq;
+
+        r.querySelector('.r-c-amt').innerText = ca > 0 ? ca : '';
+        r.querySelector('.r-s-amt').innerText = sa > 0 ? sa : '';
+
+        const diff = sa - ca;
+        if (diff > 0) {
+          r.querySelector('.r-plus').innerText = diff;
+          r.querySelector('.r-minus').innerText = '';
+          sumPlus += diff;
+        } else if (diff < 0) {
+          r.querySelector('.r-plus').innerText = '';
+          r.querySelector('.r-minus').innerText = Math.abs(diff);
+          sumMinus += Math.abs(diff);
+        } else {
+          r.querySelector('.r-plus').innerText = '';
+          r.querySelector('.r-minus').innerText = '';
+        }
+
+        sumContract += ca;
+        sumSettled += sa;
+      });
+
+      document.getElementById('totalContract').innerText = sumContract;
+      document.getElementById('totalSettled').innerText = sumSettled;
+      document.getElementById('totalPlus').innerText = sumPlus;
+      document.getElementById('totalMinus').innerText = sumMinus;
+
+      const chineseStr = numToChinese(sumSettled);
+      document.getElementById('chineseTotal1').innerText = chineseStr;
+      document.getElementById('contractAmt2').innerText = chineseStr;
+      document.getElementById('contractAmt3').innerText = chineseStr;
+      document.getElementById('settledAmt3').innerText = chineseStr;
+    }
+
+    function setPageOrientation(orientation) {
+      const styleEl = document.getElementById('dynamic-print-style');
+      if (orientation === 'landscape') {
+        styleEl.innerHTML = `
+          @page { size: A4 landscape !important; margin: 0mm !important; }
+          .sheet-landscape { page: landscape-sheet !important; }
+        `;
+      } else if (orientation === 'portrait') {
+        styleEl.innerHTML = `
+          @page { size: A4 portrait !important; margin: 0mm !important; }
+          .sheet-portrait { page: portrait-sheet !important; }
+        `;
+      } else {
+        styleEl.innerHTML = `
+          @page { margin: 0mm !important; }
+          @page landscape-sheet { size: A4 landscape !important; margin: 0mm !important; }
+          @page portrait-sheet { size: A4 portrait !important; margin: 0mm !important; }
+          .sheet-landscape { page: landscape-sheet !important; }
+          .sheet-portrait { page: portrait-sheet !important; }
+        `;
+      }
+    }
+
+    function switchTab(target, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      const sheets = document.querySelectorAll('.page-sheet');
+      if (target === 'all') {
+        setPageOrientation('mixed');
+        sheets.forEach(s => {
+          s.style.display = 'flex';
+          s.classList.remove('hide-print');
+        });
+      } else {
+        if (target === 'form1') {
+          setPageOrientation('landscape');
+        } else {
+          setPageOrientation('portrait');
+        }
+        sheets.forEach(s => {
+          if (s.id === target) {
+            s.style.display = 'flex';
+            s.classList.remove('hide-print');
+          } else {
+            s.style.display = 'none';
+            s.classList.add('hide-print');
+          }
+        });
+      }
+    }
+
+    function printForm1Landscape() {
+      setPageOrientation('landscape');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btnTab1').classList.add('active');
+      
+      document.querySelectorAll('.page-sheet').forEach(s => {
+        if (s.id === 'form1') {
+          s.style.display = 'flex';
+          s.classList.remove('hide-print');
+        } else {
+          s.style.display = 'none';
+          s.classList.add('hide-print');
+        }
+      });
+      setTimeout(() => { window.print(); }, 250);
+    }
+
+    function printForms234Portrait() {
+      setPageOrientation('portrait');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      document.querySelectorAll('.page-sheet').forEach(s => {
+        if (s.id !== 'form1') {
+          s.style.display = 'flex';
+          s.classList.remove('hide-print');
+        } else {
+          s.style.display = 'none';
+          s.classList.add('hide-print');
+        }
+      });
+      setTimeout(() => { window.print(); }, 250);
+    }
+
+    function applyIncomingStatementData() {
+      const raw = localStorage.getItem('TRANSFER_FOUR_FORMS_DATA');
+      if (!raw) return;
+
+      try {
+        const data = JSON.parse(raw);
+        if (Date.now() - data.timestamp > 3600000) return;
+
+        // 1. 同步對帳單日期至填表/填發日期
+        if (data.orderDate && data.orderDate.trim()) {
+          const dStr = data.orderDate.trim();
+          const f1Date = document.getElementById('dateFillForm1');
+          if (f1Date) f1Date.innerText = dStr;
+          const f2Date = document.getElementById('dateVerifyForm2');
+          if (f2Date) f2Date.innerText = dStr;
+          const f3Date = document.getElementById('dateVerifyForm3');
+          if (f3Date) f3Date.innerText = dStr;
+          const f4Date = document.getElementById('dateForm4Agreement');
+          if (f4Date) f4Date.innerText = `中華民國 ${dStr.replace('年',' 年 ').replace('月',' 月 ')}`;
+        }
+
+        // 2. 同步學校全名
+        if (data.schoolName) {
+          let school = data.schoolName.trim();
+          if (!school.endsWith('國民小學') && school.endsWith('國小')) {
+            school = school.replace(/國小$/, '國民小學');
+          }
+
+          const f1Title = document.getElementById('form1SchoolTitle');
+          if (f1Title) f1Title.innerText = school;
+          const f1Summary = document.getElementById('form1SubjectSummary');
+          if (f1Summary) {
+            f1Summary.innerText = `115學年度${school}非審定本教科圖書議價作業(出版商:何嘉仁實業股份有限公司)`;
+          }
+
+          const f2Title = document.getElementById('form2Title');
+          if (f2Title) f2Title.innerText = `${school}    驗收記錄`;
+          const f2Loc = document.getElementById('form2Location');
+          if (f2Loc) f2Loc.innerText = `地點： ${school}`;
+
+          const f3Title = document.getElementById('form3Title');
+          if (f3Title) f3Title.innerText = `${school} 財物結算驗收證明書`;
+          const f3Loc = document.getElementById('form3Location');
+          if (f3Loc) f3Loc.innerText = school;
+
+          const f4Notice = document.getElementById('form4Notice');
+          if (f4Notice) {
+            f4Notice.innerHTML = `立同意書人 <span style="font-weight: bold; border-bottom: 1px solid #000; padding: 0 4px;">鍠嘉文化教育用品社</span>，同意<span id="form4SchoolNotice">${school}</span>將給付款項，直接匯存入立同意書人之金融機構存款帳戶，匯款手續費逕由款項中扣除。`;
+          }
+          const f4Rec = document.getElementById('form4Recipient');
+          if (f4Rec) f4Rec.innerHTML = `此致 &nbsp;&nbsp;&nbsp;&nbsp; ${school}`;
+        }
+
+        // 3. 清空項次 1~9 列原本內容
+        const rows = document.querySelectorAll('#gridRows tr');
+        rows.forEach(r => {
+          r.querySelector('td:nth-child(2)').innerText = '';
+          r.querySelector('td:nth-child(3)').innerText = '';
+          r.querySelector('td:nth-child(4)').innerText = '';
+          r.querySelector('.r-price').innerText = '';
+          r.querySelector('.r-c-qty').innerText = '';
+          r.querySelector('.r-c-amt').innerText = '';
+          r.querySelector('.r-s-qty').innerText = '';
+          r.querySelector('.r-s-amt').innerText = '';
+          r.querySelector('.r-plus').innerText = '';
+          r.querySelector('.r-minus').innerText = '';
+          r.querySelector('td:nth-child(12)').innerText = '';
+        });
+
+        // 4. 填入教材明細
+        data.items.forEach((item, idx) => {
+          if (idx < rows.length) {
+            const tr = rows[idx];
+            tr.querySelector('td:nth-child(2)').innerText = item.name;
+            tr.querySelector('td:nth-child(4)').innerText = item.unit || '本';
+            tr.querySelector('.r-price').innerText = item.price;
+            tr.querySelector('.r-c-qty').innerText = item.contractQty;
+            tr.querySelector('.r-s-qty').innerText = item.settledQty;
+            tr.querySelector('td:nth-child(12)').innerText = item.remark || '';
+          }
+        });
+
+        calcTotals();
+        localStorage.removeItem('TRANSFER_FOUR_FORMS_DATA');
+
+        setTimeout(() => {
+          alert(`✅ 已成功由對帳單匯入【${data.schoolName || '學校'}】的結算資料！\n可直接點擊右上角按鈕列印四表。`);
+        }, 200);
+
+      } catch (err) {
+        console.error('解析對帳單資料失敗:', err);
+      }
+    }
+
+    document.getElementById('gridRows').addEventListener('input', () => {
+      calcTotals();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setPageOrientation('landscape');
+      initDefaultDates();            // 填表日期自動帶入當天真實日期
+      applyIncomingStatementData();  // 接收對帳單資料
+      calcTotals();
+    });
+  </script>
+</body>
+</html>
