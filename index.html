@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+window.isSubmitting = false;
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -401,8 +402,8 @@
     </div>
   </main>
 
-  <!-- 隱藏的 iframe 用於接收表單回傳，避免網頁跳轉 -->
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(isSubmitting){onIframeLoad();}"></iframe>
+  <!-- ✅ 安全寫法 (加上 src="about:blank" 與 window.isSubmitting 全域檢查) -->
+<iframe name="hidden_iframe" id="hidden_iframe" src="about:blank" style="display:none;" onload="if(window.isSubmitting){onIframeLoad();}"></iframe>
 
   <script src="js/schools.js"></script>
   <script>
