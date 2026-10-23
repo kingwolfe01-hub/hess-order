@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-window.isSubmitting = false;
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -402,13 +401,13 @@ window.isSubmitting = false;
     </div>
   </main>
 
-  <!-- ✅ 安全寫法 (加上 src="about:blank" 與 window.isSubmitting 全域檢查) -->
-<iframe name="hidden_iframe" id="hidden_iframe" src="about:blank" style="display:none;" onload="if(window.isSubmitting){onIframeLoad();}"></iframe>
+  <!-- 隱藏的 iframe 用於接收表單回傳，避免網頁跳轉 -->
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(isSubmitting){onIframeLoad();}"></iframe>
 
   <script src="js/schools.js"></script>
   <script>
     // ✅ 已替換為您最新部署的 Google Apps Script 網址
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyC6ibSq2874CKZIJVgqrJRYMB9UKOD2pXI_-iRceYdmn67BwiYo6sa_4y4_UwUyWKt/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4gTP3UE9GjlSPEefmPa9UXc--mOUgZFzTpbFsQ24oQJBlt5Ra0TYvtg2LnvjS_WOK/exec";
 
     let targetAcademicYear = 115;
     let targetSemester = '2'; 
