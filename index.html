@@ -89,7 +89,7 @@
         <select id="schoolOrderHistorySelect" onchange="loadSavedOrder(this.value)" class="border border-slate-300 rounded px-1.5 py-0.5 text-xs bg-white text-slate-700 font-mono">
           <option value="current">-- 填寫中新單據 --</option>
         </select>
-        <button type="button" id="btnSyncBackend" onclick="fetchOrdersFromBackend(true, true)" title="從雲端試算表重新同步" class="px-2 py-0.5 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-bold shadow-sm transition flex items-center gap-1">☁️ 雲端同步</button>
+        <button type="button" id="btnSyncBackend" onclick="fetchOrdersFromBackend(true)" title="從雲端試算表重新同步" class="px-2 py-0.5 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-bold shadow-sm transition flex items-center gap-1">☁️ 雲端同步</button>
         <button type="button" onclick="createNewOrderForSchool()" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold shadow-sm transition flex items-center gap-0.5">＋ 建立第二筆</button>
       </div>
     </div>
@@ -154,7 +154,7 @@
           </div>
           <div class="col-span-4 flex items-center">
             <span class="font-bold text-red-800 whitespace-nowrap">承辦信箱：</span>
-            <input type="email" id="contactEmail" placeholder="必填，發送收據與改單驗證" class="border-b border-slate-400 flex-1 px-1 outline-none font-mono-num text-slate-900 bg-amber-50/40 min-w-0" required>
+            <input type="email" id="contactEmail" placeholder="寄發電子確認收據" class="border-b border-slate-400 flex-1 px-1 outline-none font-mono-num text-slate-900 bg-amber-50/40 min-w-0">
           </div>
 
           <div class="col-span-12 flex items-center pt-0.5">
@@ -415,7 +415,6 @@
     let currentOrderType = 'initial';
     let currentSchoolKey = '';
     let isSubmitting = false;
-    let sessionVerifiedEmails = {}; // ★ 記錄本工作階段已通過安全驗證之學校承辦信箱
 
     const ORDER_RULE = {
       '2': { name: '第二學期', titleSuffix: '第二學期', bookType: '雙數冊', lowGrades: { g1: 2, g2: 4 }, midHighGrades: { g3: 2, g4: 4, g5: 6, g6: 8 }, hintLow: '預訂下學期：一年級第2冊、二年級第4冊 (雙數冊)', hintMid: '預訂下學期為雙數冊：2、4、6、8 冊', deliveryWeeks: ['12/21 - 12/24', '12/28 - 12/31', '1/4 - 1/8', '1/11 - 1/15', '1/18 - 1/22'] },
@@ -473,25 +472,18 @@
         // 自動載入該校歷史訂單供修改（注意：保持 modify 模式，不可還原成 initial！）
         const sName = document.getElementById('schoolName').value.trim();
         if (sName) {
-          const isVerified = sessionVerifiedEmails[currentSchoolKey || sName];
-          if (!isVerified) {
-            fetchOrdersFromBackend(true);
+          const store = getSavedOrdersStorage();
+          const key = currentSchoolKey || Object.keys(store).find(k => k.includes(sName));
+          const orders = key ? (store[key] || []) : [];
+          if (orders.length > 0) {
+            const selectEl = document.getElementById('schoolOrderHistorySelect');
+            let selIdx = selectEl.value !== 'current' ? parseInt(selectEl.value, 10) : (orders.length - 1);
+            if (isNaN(selIdx) || selIdx < 0 || selIdx >= orders.length) selIdx = orders.length - 1;
+            selectEl.value = selIdx;
+            loadSavedOrder(selIdx, true); // true 代表是改單模式載入
           } else {
-            const store = getSavedOrdersStorage();
-            const key = currentSchoolKey || Object.keys(store).find(k => k.includes(sName));
-            const orders = key ? (store[key] || []) : [];
-            if (orders.length > 0) {
-              const selectEl = document.getElementById('schoolOrderHistorySelect');
-              let selIdx = selectEl.value !== 'current' ? parseInt(selectEl.value, 10) : (orders.length - 1);
-              if (isNaN(selIdx) || selIdx < 0 || selIdx >= orders.length) selIdx = orders.length - 1;
-              selectEl.value = selIdx;
-              loadSavedOrder(selIdx, true); // true 代表是改單模式載入
-            } else {
-              fetchOrdersFromBackend(true);
-            }
+            fetchOrdersFromBackend(true);
           }
-        } else {
-          alert('請先輸入或選取欲改單的學校名稱！');
         }
       } else if (type === 'append') {
         btnApp.className = "px-2.5 py-0.5 text-xs font-bold rounded-r-md border border-blue-600 bg-blue-600 text-white shadow-sm";
@@ -608,10 +600,7 @@
       refreshSchoolOrderHistoryDropdown();
       updateQRCode();
 
-      // ★ 學校前台個資保密：首單自由填報，不自動讀取歷史個資；僅在改單或增訂模式下才向後端驗證讀取
-      if (currentOrderType === 'modify' || currentOrderType === 'append') {
-        fetchOrdersFromBackend(false);
-      }
+      fetchOrdersFromBackend(false);
     }
 
     document.addEventListener('click', (e) => {
@@ -853,10 +842,6 @@
       const sName = document.getElementById('schoolName').value.trim();
       if (!currentSchoolKey && !sName) return;
 
-      // ★ 個資防護：若尚未通過該校信箱身分驗證，不列出歷史單據，防範公用電腦窺探
-      const isVerified = sessionVerifiedEmails[currentSchoolKey || sName];
-      if (!isVerified) return;
-
       const store = getSavedOrdersStorage();
       let targetKey = currentSchoolKey;
       if (!targetKey || !store[targetKey]) {
@@ -876,8 +861,8 @@
       });
     }
 
-    // 🌐 雲端同步抓取：加上縣市與鄉鎮精確過濾與 Email 身分驗證！
-    async function fetchOrdersFromBackend(showAlert = false, forcePrompt = false) {
+    // 🌐 雲端同步抓取：加上縣市與鄉鎮精確過濾，避免不同縣市同名學校混淆！
+    async function fetchOrdersFromBackend(showAlert = false) {
       const sName = document.getElementById('schoolName').value.trim();
       const sCity = document.getElementById('schoolCity').value.trim();
       const sDist = document.getElementById('schoolDistrict').value.trim();
@@ -886,46 +871,21 @@
         return;
       }
 
-      // ★ 學校前台個資保密核心機制：輸入原建檔老師 Email 驗證才能讀取資料 ★
-      const schoolKey = currentSchoolKey || `${sCity}_${sDist}_${sName}`;
-      let cachedEmail = sessionVerifiedEmails[schoolKey] || sessionVerifiedEmails[sName] || '';
-      let verifyEmail = cachedEmail;
-
-      if (!verifyEmail || forcePrompt) {
-        const currentInputEmail = document.getElementById('contactEmail').value.trim();
-        const promptVal = prompt(
-          `🔒【學校個資安全驗證】\n您正在請求讀取「${sName}國小」的歷史訂單。\n\n為保障學校個資安全，請輸入此校原建檔承辦老師的電子信箱 (Email)：`,
-          currentInputEmail || cachedEmail || ""
-        );
-
-        if (!promptVal || !promptVal.trim()) {
-          if (showAlert) alert('ℹ️ 未提供驗證信箱，已取消讀取歷史資料。\n（若欲填報新單，請切換至「首筆訂購單」）');
-          return;
-        }
-        verifyEmail = promptVal.trim().toLowerCase();
-      }
-
       const syncBtn = document.getElementById('btnSyncBackend');
-      if (syncBtn) { syncBtn.textContent = '🔄 驗證同步中...'; syncBtn.disabled = true; }
+      if (syncBtn) { syncBtn.textContent = '🔄 同步中...'; syncBtn.disabled = true; }
 
       try {
-        const queryUrl = `${GAS_WEB_APP_URL}?action=getOrders&schoolName=${encodeURIComponent(sName)}&schoolCity=${encodeURIComponent(sCity)}&schoolDistrict=${encodeURIComponent(sDist)}&academicYear=${targetAcademicYear}&semester=${targetSemester}&verifyEmail=${encodeURIComponent(verifyEmail)}`;
+        const queryUrl = `${GAS_WEB_APP_URL}?action=getOrders&schoolName=${encodeURIComponent(sName)}&schoolCity=${encodeURIComponent(sCity)}&schoolDistrict=${encodeURIComponent(sDist)}&academicYear=${targetAcademicYear}&semester=${targetSemester}`;
         const response = await fetch(queryUrl);
         const resData = await response.json();
 
         if (resData && resData.status === 'success' && Array.isArray(resData.orders) && resData.orders.length > 0) {
-          // 驗證成功：記錄到本工作階段已驗證信箱
-          sessionVerifiedEmails[schoolKey] = verifyEmail;
-          sessionVerifiedEmails[sName] = verifyEmail;
-
           const store = getSavedOrdersStorage();
-          store[schoolKey] = resData.orders;
+          const key = currentSchoolKey || `${sCity}_${sDist}_${sName}`;
+          store[key] = resData.orders;
           localStorage.setItem('HESS_B_ORDERS_V1', JSON.stringify(store));
-          currentSchoolKey = schoolKey;
+          currentSchoolKey = key;
           refreshSchoolOrderHistoryDropdown();
-
-          // 自動填入驗證通過之信箱至表單
-          document.getElementById('contactEmail').value = verifyEmail;
 
           // 若為改單模式，自動將最新一筆載入
           if (currentOrderType === 'modify') {
@@ -933,20 +893,13 @@
             document.getElementById('schoolOrderHistorySelect').value = latestIdx;
             loadSavedOrder(latestIdx, true);
           }
-          if (showAlert) alert(`🎉 身分驗證成功！\n已順利從雲端載入「${sName}國小」${resData.orders.length} 筆歷史訂單。`);
-        } else if (resData && resData.status === 'auth_failed') {
-          // 驗證失敗：清除本校暫存驗證紀錄
-          delete sessionVerifiedEmails[schoolKey];
-          delete sessionVerifiedEmails[sName];
-          alert(`❌ 身分驗證失敗！\n\n您輸入的電子信箱【${verifyEmail}】與「${sName}國小」原建檔資料不符，系統已阻絕讀取！\n\n如需協助確認，請洽詢負責之經銷商業務代表。`);
-        } else if (resData && resData.status === 'need_email') {
-          alert('⚠️ 請輸入有效的電子信箱以進行身分安全驗證。');
+          if (showAlert) alert(`✅ 成功從雲端同步 ${resData.orders.length} 筆歷史單據！`);
         } else {
-          if (showAlert) alert(`ℹ️ 雲端試算表中目前沒有找到「${sName}國小」的歷史訂單紀錄。\n若為首次訂購，請直接以「首筆訂單」進行填報。`);
+          if (showAlert) alert('ℹ️ 雲端試算表中目前沒有找到此學校的歷史訂單紀錄。');
         }
       } catch (err) {
         console.warn('雲端同步失敗:', err);
-        if (showAlert) alert('⚠️ 無法從雲端同步資料。請確認網路連線或稍後再試。');
+        if (showAlert) alert('⚠️ 無法從雲端同步資料。請確認 Google Apps Script 是否已重新發布「新版本」，且存取權限設為「所有人」。');
       } finally {
         if (syncBtn) { syncBtn.textContent = '☁️ 雲端同步'; syncBtn.disabled = false; }
       }
@@ -982,10 +935,7 @@
 
       if (!data.schoolName) { alert('⚠️ 請填寫或搜尋「訂購學校名稱」！'); return document.getElementById('schoolSearchInput').focus(); }
       if (!data.contactPerson) { alert('⚠️ 請填寫「承辦人員」姓名或職稱！'); return document.getElementById('contactPerson').focus(); }
-      if (!data.contactEmail || !data.contactEmail.includes('@')) { 
-        alert('⚠️ 為了保障您的訂單個資安全與後續改單身分驗證，請務必填寫有效的「承辦信箱」！'); 
-        return document.getElementById('contactEmail').focus(); 
-      }
+      if (data.contactEmail && !data.contactEmail.includes('@')) { alert('⚠️ 承辦信箱格式不正確，請包含 @ 符號（或留空）！'); return document.getElementById('contactEmail').focus(); }
       if (Object.keys(data.items).length === 0) { alert('⚠️ 您尚未填寫任何教材訂購數量！'); return; }
 
       const existingSerial = document.getElementById('badgeOrderNo').textContent.trim();
@@ -1006,7 +956,6 @@
 
       saveOrderToStorage(data);
       updateQRCode();
-      sessionVerifiedEmails[currentSchoolKey || data.schoolName] = data.contactEmail.trim().toLowerCase();
 
       isSubmitting = true;
       const btnSubmit = document.getElementById('btnSubmitOrder');
