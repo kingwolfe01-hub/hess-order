@@ -318,3 +318,4 @@ const SCHOOL_DATABASE = [
   {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "紅葉", "phone": "049-2955075", "address": "[54666]南投縣仁愛鄉發祥村仁盛路70號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"},
   {"city": "南投", "fullCity": "南投縣", "district": "仁愛鄉", "name": "清境", "phone": "049-2802572", "address": "[54641]南投縣仁愛鄉定遠新村24號", "defaultDeliveryLocation": "教務處", "salesman": "黃亮智"}
 ];
+if (typeof window !== "undefined") { window.SCHOOL_DATABASE = SCHOOL_DATABASE; }
